@@ -14,8 +14,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
-import java.util.Optional;
-
 /**
  * Spring Security 安全配置类
  * 负责配置用户认证、授权、密码加密等安全相关功能
@@ -49,7 +47,7 @@ public class SecurityConfig {
             @Override
             public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
                 // 从数据库查找用户
-                Optional<User> user = userRepository.findByUsername(username);
+                User user = userRepository.findByUsername(username);
                 if (user == null) {
                     throw new UsernameNotFoundException("用户不存在: " + username);
                 }
@@ -76,19 +74,14 @@ public class SecurityConfig {
             // 配置URL访问权限
             .authorizeRequests()
                 // 允许所有人访问的页面（无需登录）
-                .antMatchers("/", "/login", "/register", "/static/**", "/css/**", "/js/**", "/images/**").permitAll()
-                .antMatchers("/user/activities", "/user/activities/**").permitAll() // 活动浏览页面
+                .antMatchers("/", "/login", "/register", "/welcome", "/hall", "/debug/**", "/static/**", "/css/**", "/js/**", "/images/**").permitAll()
+                .antMatchers("/user/activities/page", "/user/activities/page/**").permitAll() // 活动浏览页面允许匿名访问
                 .antMatchers("/h2-console/**").permitAll() // 允许访问H2数据库控制台
                 // 需要特定角色才能访问的页面
-                .antMatchers("/admin/**").hasRole("ADMIN") // 管理员页面
-                .antMatchers("/user/**").hasRole("USER")   // 用户页面
+                .antMatchers("/admin/**").hasAnyRole("ADMIN") // 管理员页面
+                .antMatchers("/user/my-registrations", "/user/registrations/**").hasAnyRole("USER", "ADMIN") // 用户报名相关页面
+                .antMatchers("/user/**").hasAnyRole("USER", "ADMIN")   // 其他用户页面
                 .anyRequest().authenticated() // 其他所有请求都需要认证
-                .antMatchers("/", "/login", "/static/**", "/css/**", "/js/**", "/images/**").permitAll()
-                .antMatchers("/user/activities", "/user/activities/**").permitAll()
-                .antMatchers("/h2-console/**").permitAll() // 允许访问H2控制台
-                .antMatchers("/admin/**").hasRole("ADMIN")
-                .antMatchers("/user/**").hasRole("USER")
-                .anyRequest().authenticated()
                 .and()
             // 配置表单登录
             .formLogin()
@@ -105,8 +98,6 @@ public class SecurityConfig {
             .csrf().disable()
             // 禁用X-Frame-Options（支持H2控制台的iframe显示）
             .headers().frameOptions().disable();
-            .csrf().disable() // 暂时禁用CSRF以便测试
-            .headers().frameOptions().disable(); // 允许H2控制台的iframe
 
         return http.build();
     }
