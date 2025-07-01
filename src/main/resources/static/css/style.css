@@ -1,23 +1,137 @@
 body {
-    font-family: Arial, sans-serif;
-    line-height: 1.6;
     margin: 0;
-    padding: 0;
+    font-family: 'Noto Sans SC', sans-serif;
+    background-color: #f9f9fb;
+    color: #333;
+}
+
+/*修改了css样式 优化了一下界面*/
+/*后续需要优化其他页面可以把这个css抛给AI 让他参考修改美化你的页面
+我们自己写只需要修改基本功能即可*/
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
 header {
-    background-color: #333;
+    background-color: #2d3e50;
     color: #fff;
-    padding: 1rem;
+    padding: 20px 0;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 28px;
+}
+
+nav ul {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    gap: 20px;
+    margin-top: 10px;
+}
+
+nav a {
+    color: #fff;
+    font-weight: bold;
+    transition: color 0.3s ease;
+}
+
+nav a:hover {
+    color: #00bcd4;
+}
+
+.hero-section {
+    background: linear-gradient(to right, #4facfe, #00f2fe);
+    color: white;
+    padding: 60px 20px;
     text-align: center;
+    border-radius: 0 0 20px 20px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.hero-section h2 {
+    font-size: 36px;
+    margin-bottom: 10px;
+}
+
+.quick-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    margin: 40px 0;
+}
+
+.action-card {
+    background-color: #fff;
+    border-radius: 12px;
+    padding: 30px 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    text-align: center;
+    transition: transform 0.2s ease;
+}
+
+.action-card:hover {
+    transform: translateY(-5px);
+}
+
+.action-card h3 {
+    margin-bottom: 10px;
+    color: #2c3e50;
+}
+
+.action-card p {
+    margin-bottom: 20px;
+    color: #555;
+}
+
+.btn {
+    display: inline-block;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.btn-primary {
+    background-color: #00bcd4;
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background-color: #0097a7;
+}
+
+.btn-secondary {
+    background-color: #4caf50;
+    color: #fff;
+}
+
+.btn-secondary:hover {
+    background-color: #388e3c;
+}
+
+.btn-admin {
+    background-color: #f44336;
+    color: #fff;
+}
+
+.btn-admin:hover {
+    background-color: #d32f2f;
 }
 
 footer {
-    background-color: #333;
+    background-color: #2d3e50;
     color: #fff;
     text-align: center;
-    padding: 1rem;
-    position: fixed;
-    bottom: 0;
-    width: 100%;
+    padding: 20px 0;
+    font-size: 14px;
 }

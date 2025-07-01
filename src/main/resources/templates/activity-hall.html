@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>活动大厅 - 校园活动平台</title>
+    <link rel="stylesheet" th:href="@{/static/css/style.css}">
+</head>
+<body>
+    <header>
+        <h1>活动大厅</h1>
+        <nav>
+            <a href="/">首页</a>
+            <a href="/login">登录</a>
+            <a href="/register">注册</a>
+        </nav>
+    </header>
+
+    <main>
+        <h2>所有活动</h2>
+        <div th:if="${activities != null and !activities.empty}">
+            <div th:each="activity : ${activities}" class="activity-card">
+                <h3 th:text="${activity.title}">活动标题</h3>
+                <p th:text="${activity.description}">活动描述</p>
+                <p>开始时间: <span th:text="${activity.startTime}">开始时间</span></p>
+                <p>结束时间: <span th:text="${activity.endTime}">结束时间</span></p>
+                <p>容量: <span th:text="${activity.capacity}">容量</span></p>
+            </div>
+        </div>
+        <div th:if="${activities == null or activities.empty}">
+            <p>暂无活动，敬请期待！</p>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 校园活动平台. 保留所有权利.</p>
+    </footer>
+</body>
+</html>

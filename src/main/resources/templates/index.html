@@ -4,9 +4,14 @@
     <meta charset="UTF-8">
     <title>校园活动平台 - 首页</title>
     <link rel="stylesheet" th:href="@{/static/css/style.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet">
 </head>
+
+<!--修改了HTML的Index布局 用AI优化的 后续需要优化其他界面也一样可以用AI-->
+
 <body>
-    <header id="header">
+<header id="header">
+    <div class="container">
         <h1>校园活动平台</h1>
         <nav>
             <ul>
@@ -15,37 +20,42 @@
                 <li><a href="/user/my-registrations">我的报名</a></li>
             </ul>
         </nav>
-    </header>
-    
-    <main id="content">
-        <div class="hero-section">
+    </div>
+</header>
+
+<main id="content">
+    <section class="hero-section">
+        <div class="container">
             <h2>欢迎来到校园活动平台</h2>
-            <p>发现精彩活动，参与校园生活</p>
+            <p>发现精彩活动，参与丰富多彩的校园生活</p>
         </div>
-        
-        <div class="quick-actions">
-            <div class="action-card">
-                <h3>浏览活动</h3>
-                <p>查看所有可参与的校园活动</p>
-                <a href="/user/activities/page" class="btn btn-primary">查看活动</a>
-            </div>
-            
-            <div class="action-card">
-                <h3>我的报名</h3>
-                <p>管理您已报名的活动</p>
-                <a href="/user/my-registrations" class="btn btn-secondary">我的报名</a>
-            </div>
-            
-            <div class="action-card">
-                <h3>活动管理</h3>
-                <p>管理员功能：创建和管理活动</p>
-                <a href="/admin/activities/page" class="btn btn-admin">管理活动</a>
-            </div>
+    </section>
+
+    <section class="quick-actions container">
+        <div class="action-card">
+            <h3>浏览活动</h3>
+            <p>查看所有可参与的校园活动</p>
+            <a href="/user/activities/page" class="btn btn-primary">查看活动</a>
         </div>
-    </main>
-    
-    <footer id="footer">
-        <p>&copy; 2024 校园活动平台. 保留所有权利.</p>
-    </footer>
+
+        <div class="action-card">
+            <h3>我的报名</h3>
+            <p>管理您已报名的活动</p>
+            <a href="/user/my-registrations" class="btn btn-secondary">我的报名</a>
+        </div>
+
+        <div class="action-card">
+            <h3>活动管理</h3>
+            <p>管理员功能：创建和管理活动</p>
+            <a href="/admin/activities/page" class="btn btn-admin">管理活动</a>
+        </div>
+    </section>
+</main>
+
+<footer id="footer">
+    <div class="container">
+        <p>&copy; 2025 校园活动平台. 保留所有权利.</p>
+    </div>
+</footer>
 </body>
 </html>

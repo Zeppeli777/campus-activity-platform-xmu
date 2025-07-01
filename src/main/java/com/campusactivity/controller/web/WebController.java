@@ -17,11 +17,16 @@ public class WebController {
     private ActivityService activityService;
     
     /**
-     * 首页
+     * 首页 - 显示欢迎页面和快速导航
+     * 可以在这里添加数据，传递给前端模板
      */
     @GetMapping("/")
-    public String index() {
-        return "index";
+    public String index(Model model) {
+        // 可以添加一些数据传递给前端
+        model.addAttribute("welcomeMessage", "欢迎来到厦门大学校园活动平台");
+        model.addAttribute("totalActivities", activityService.getAllActivities().size());
+
+        return "index"; // 返回 templates/index.html 模板
     }
     
     /**
@@ -72,5 +77,27 @@ public class WebController {
     @GetMapping("/login")
     public String login() {
         return "login";
+    }
+
+    /**
+     * 欢迎页面 - 可作为备选首页
+     */
+    @GetMapping("/welcome")
+    public String welcome(Model model) {
+        List<Activity> recentActivities = activityService.getAllActivities();
+        model.addAttribute("recentActivities", recentActivities);
+        model.addAttribute("title", "欢迎页面");
+        return "welcome";
+    }
+
+    /**
+     * 活动大厅 - 可作为备选首页
+     */
+    @GetMapping("/hall")
+    public String activityHall(Model model) {
+        List<Activity> activities = activityService.getAllActivities();
+        model.addAttribute("activities", activities);
+        model.addAttribute("title", "活动大厅");
+        return "activity-hall";
     }
 }
