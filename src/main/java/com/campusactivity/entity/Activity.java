@@ -1,10 +1,8 @@
 package com.campusactivity.entity;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 public class Activity {
@@ -16,6 +14,14 @@ public class Activity {
     private Date startTime;
     private Date endTime;
     private Integer capacity;
+    private String location; // 添加地点字段
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "activity_type_id")
+    private ActivityType activityType;
+
+    @OneToMany(mappedBy = "activity", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Registration> registrations;
 
     // Getters and Setters
     public Long getId() {
@@ -64,5 +70,29 @@ public class Activity {
 
     public void setCapacity(Integer capacity) {
         this.capacity = capacity;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public ActivityType getActivityType() {
+        return activityType;
+    }
+
+    public void setActivityType(ActivityType activityType) {
+        this.activityType = activityType;
+    }
+
+    public List<Registration> getRegistrations() {
+        return registrations;
+    }
+
+    public void setRegistrations(List<Registration> registrations) {
+        this.registrations = registrations;
     }
 }

@@ -29,7 +29,9 @@
                     <div class="activity-meta">
                         <span th:if="${activity.startTime}" th:text="'开始时间: ' + ${#dates.format(activity.startTime, 'yyyy-MM-dd HH:mm')}">开始时间</span>
                         <span th:if="${activity.endTime}" th:text="'结束时间: ' + ${#dates.format(activity.endTime, 'yyyy-MM-dd HH:mm')}">结束时间</span>
+                        <span th:if="${activity.location}" th:text="'地点: ' + ${activity.location}">地点</span>
                         <span th:if="${activity.capacity}" th:text="'容量: ' + ${activity.capacity} + '人'">容量</span>
+                        <span th:if="${activity.activityType}" th:text="'类型: ' + ${activity.activityType.name}">活动类型</span>
                     </div>
                     <div class="activity-actions">
                         <a th:href="@{/user/activities/page/{id}(id=${activity.id})}" class="btn btn-primary">查看详情</a>
