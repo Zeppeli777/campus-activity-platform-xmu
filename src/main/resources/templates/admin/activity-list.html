@@ -1,14 +1,154 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>管理员活动列表</title>
+    <title th:text="${title} ?: '管理员活动列表'"></title>
     <link rel="stylesheet" th:href="@{/static/css/style.css}">
 </head>
 <body>
-    <header th:replace="layout/header :: header"></header>
-    <h1>管理员活动列表</h1>
-    <!-- 活动列表内容 -->
-    <footer th:replace="layout/footer :: footer"></footer>
+    <header id="header">
+        <div class="container">
+            <h1>校园活动平台 - 管理后台</h1>
+            <nav>
+                <ul>
+                    <li><a href="/">首页</a></li>
+                    <li><a href="/user/activities/page">用户活动</a></li>
+                    <li><a href="/admin/activities/page" class="active">管理员活动</a></li>
+                    <li><a href="/user/my-registrations">我的报名</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main id="content">
+        <div class="container">
+            <div class="admin-header">
+                <h1>活动管理</h1>
+                <div class="admin-actions">
+                    <a href="/admin/activities/new" class="btn btn-primary">新增活动</a>
+                    <a href="/admin/statistics" class="btn btn-secondary">统计报表</a>
+                </div>
+            </div>
+
+            <!-- 显示成功消息 -->
+            <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+
+            <!-- 显示错误消息 -->
+            <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>
+
+            <div class="activity-list">
+                <div th:if="${activities != null and !activities.isEmpty()}">
+                    <div class="activity-table-container">
+                        <table class="activity-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>活动标题</th>
+                                    <th>活动类型</th>
+                                    <th>开始时间</th>
+                                    <th>地点</th>
+                                    <th>容量</th>
+                                    <th>已报名</th>
+                                    <th>状态</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="activity : ${activities}">
+                                    <td th:text="${activity.id}">1</td>
+                                    <td>
+                                        <div class="activity-title">
+                                            <strong th:text="${activity.title}">活动标题</strong>
+                                            <small th:if="${activity.description}"
+                                                   th:text="${#strings.abbreviate(activity.description, 50)}">活动描述</small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span th:if="${activity.activityType}"
+                                              th:text="${activity.activityType.name}"
+                                              class="activity-type-badge">活动类型</span>
+                                        <span th:unless="${activity.activityType}" class="text-muted">未分类</span>
+                                    </td>
+                                    <td>
+                                        <span th:if="${activity.startTime}"
+                                              th:text="${#dates.format(activity.startTime, 'MM-dd HH:mm')}">开始时间</span>
+                                        <span th:unless="${activity.startTime}" class="text-muted">未设置</span>
+                                    </td>
+                                    <td>
+                                        <span th:if="${activity.location}" th:text="${activity.location}">地点</span>
+                                        <span th:unless="${activity.location}" class="text-muted">未设置</span>
+                                    </td>
+                                    <td>
+                                        <span th:if="${activity.capacity}" th:text="${activity.capacity}">容量</span>
+                                        <span th:unless="${activity.capacity}" class="text-muted">无限制</span>
+                                    </td>
+                                    <td>
+                                        <span th:text="${activity.registrations != null ? activity.registrations.size() : 0}">0</span>
+                                    </td>
+                                    <td>
+                                        <span th:if="${activity.startTime != null and activity.startTime.before(#dates.createNow())}"
+                                              class="status-badge status-ended">已结束</span>
+                                        <span th:if="${activity.startTime != null and activity.startTime.after(#dates.createNow())}"
+                                              class="status-badge status-upcoming">即将开始</span>
+                                        <span th:unless="${activity.startTime}"
+                                              class="status-badge status-draft">草稿</span>
+                                    </td>
+                                    <td class="action-buttons">
+                                        <a th:href="@{/admin/activities/page/{id}(id=${activity.id})}"
+                                           class="btn btn-sm btn-info" title="查看详情">详情</a>
+                                        <a th:href="@{/admin/activities/edit/{id}(id=${activity.id})}"
+                                           class="btn btn-sm btn-warning" title="编辑活动">编辑</a>
+                                        <a th:href="@{/admin/activities/{id}/registrations(id=${activity.id})}"
+                                           class="btn btn-sm btn-secondary" title="报名管理">报名</a>
+                                        <button th:onclick="'deleteActivity(' + ${activity.id} + ')'"
+                                                class="btn btn-sm btn-danger" title="删除活动">删除</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div th:if="${activities == null or activities.isEmpty()}" class="no-activities">
+                    <div class="empty-state">
+                        <h3>暂无活动</h3>
+                        <p>还没有创建任何活动，点击下方按钮开始创建第一个活动。</p>
+                        <a href="/admin/activities/new" class="btn btn-primary">创建活动</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer id="footer">
+        <div class="container">
+            <p>&copy; 2025 校园活动平台. 保留所有权利.</p>
+        </div>
+    </footer>
+
+    <script>
+        function deleteActivity(activityId) {
+            if (confirm('确定要删除这个活动吗？此操作不可撤销。')) {
+                fetch('/admin/activities/' + activityId, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        alert('活动删除成功！');
+                        location.reload();
+                    } else {
+                        alert('删除失败，请稍后重试。');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('删除失败，请稍后重试。');
+                });
+            }
+        }
+    </script>
 </body>
 </html>

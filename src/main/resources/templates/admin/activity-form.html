@@ -1,20 +1,291 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="">
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>管理员活动表单</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title}">新增活动</title>
     <link rel="stylesheet" th:href="@{/static/css/style.css}">
+    <style>
+        .form-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 30px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .form-title {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #555;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 20px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: #007bff;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #0056b3;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #545b62;
+            transform: translateY(-1px);
+        }
+
+        .alert {
+            padding: 12px 20px;
+            margin-bottom: 20px;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .required {
+            color: #dc3545;
+        }
+
+        .form-help {
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+    </style>
 </head>
 <body>
     <header th:replace="layout/header :: header"></header>
-    <h1>管理员活动表单</h1>
-    <form action="#" method="post">
-        <label for="title">活动标题:</label>
-        <input type="text" id="title" name="title" required><br>
-        <label for="description">活动描述:</label><br>
-        <textarea id="description" name="description" rows="4" cols="50"></textarea><br>
-        <input type="submit" value="提交">
-    </form>
+
+    <div class="form-container">
+        <h1 class="form-title" th:text="${title}">新增活动</h1>
+
+        <!-- 显示成功消息 -->
+        <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+
+        <!-- 显示错误消息 -->
+        <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>
+
+        <form th:action="${isEdit} ? @{'/admin/activities/edit/' + activity.id} : @{/admin/activities/new}"
+              method="post" id="activityForm">
+            <div class="form-group">
+                <label for="title">活动标题 <span class="required">*</span></label>
+                <input type="text" id="title" name="title" required
+                       th:value="${activity?.title}"
+                       placeholder="请输入活动标题" maxlength="100">
+                <div class="form-help">活动标题不能超过100个字符</div>
+            </div>
+
+            <div class="form-group">
+                <label for="description">活动描述 <span class="required">*</span></label>
+                <textarea id="description" name="description" required
+                          placeholder="请详细描述活动内容、目的、注意事项等"
+                          maxlength="1000" th:text="${activity?.description}"></textarea>
+                <div class="form-help">活动描述不能超过1000个字符</div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="startTime">开始时间 <span class="required">*</span></label>
+                    <input type="datetime-local" id="startTime" name="startTime" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="endTime">结束时间 <span class="required">*</span></label>
+                    <input type="datetime-local" id="endTime" name="endTime" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="location">活动地点 <span class="required">*</span></label>
+                    <input type="text" id="location" name="location" required
+                           th:value="${activity?.location}"
+                           placeholder="请输入活动举办地点" maxlength="100">
+                </div>
+
+                <div class="form-group">
+                    <label for="capacity">活动容量 <span class="required">*</span></label>
+                    <input type="number" id="capacity" name="capacity" required
+                           th:value="${activity?.capacity}"
+                           min="1" max="10000" placeholder="请输入活动最大参与人数">
+                    <div class="form-help">活动容量范围：1-10000人</div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="activityTypeId">活动类型 <span class="required">*</span></label>
+                <select id="activityTypeId" name="activityTypeId" required>
+                    <option value="">请选择活动类型</option>
+                    <option th:each="type : ${activityTypes}"
+                            th:value="${type.id}"
+                            th:selected="${activity?.activityType?.id == type.id}"
+                            th:text="${type.name + ' - ' + type.description}">
+                    </option>
+                </select>
+            </div>
+
+            <div class="btn-group">
+                <button type="submit" class="btn btn-primary"
+                        th:text="${isEdit} ? '更新活动' : '创建活动'">创建活动</button>
+                <a th:href="@{/admin/activities/page}" class="btn btn-secondary">取消</a>
+            </div>
+        </form>
+    </div>
+
     <footer th:replace="layout/footer :: footer"></footer>
+
+    <script>
+        // 表单验证
+        document.getElementById('activityForm').addEventListener('submit', function(e) {
+            const startTime = new Date(document.getElementById('startTime').value);
+            const endTime = new Date(document.getElementById('endTime').value);
+            const now = new Date();
+
+            // 验证开始时间不能早于当前时间
+            if (startTime <= now) {
+                alert('开始时间不能早于当前时间！');
+                e.preventDefault();
+                return false;
+            }
+
+            // 验证结束时间不能早于开始时间
+            if (endTime <= startTime) {
+                alert('结束时间必须晚于开始时间！');
+                e.preventDefault();
+                return false;
+            }
+
+            // 验证活动时长不能超过24小时
+            const duration = (endTime - startTime) / (1000 * 60 * 60);
+            if (duration > 24) {
+                alert('活动时长不能超过24小时！');
+                e.preventDefault();
+                return false;
+            }
+
+            return true;
+        });
+
+        // 设置默认时间或编辑模式时间
+        window.addEventListener('load', function() {
+            const startTimeInput = document.getElementById('startTime');
+            const endTimeInput = document.getElementById('endTime');
+
+            // 格式化为 datetime-local 格式
+            const formatDateTime = (date) => {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                const hours = String(date.getHours()).padStart(2, '0');
+                const minutes = String(date.getMinutes()).padStart(2, '0');
+                return `${year}-${month}-${day}T${hours}:${minutes}`;
+            };
+
+            // 如果是编辑模式且有现有时间数据，则使用现有数据
+            const isEdit = /*[[${isEdit}]]*/ false;
+            const activityStartTime = /*[[${activity?.startTime}]]*/ null;
+            const activityEndTime = /*[[${activity?.endTime}]]*/ null;
+
+            if (isEdit && activityStartTime && activityEndTime) {
+                // 编辑模式：使用现有活动的时间
+                startTimeInput.value = formatDateTime(new Date(activityStartTime));
+                endTimeInput.value = formatDateTime(new Date(activityEndTime));
+            } else if (!startTimeInput.value && !endTimeInput.value) {
+                // 新增模式：设置默认时间（当前时间+1小时作为开始时间，+3小时作为结束时间）
+                const now = new Date();
+                const startTime = new Date(now.getTime() + 60 * 60 * 1000); // +1小时
+                const endTime = new Date(now.getTime() + 3 * 60 * 60 * 1000); // +3小时
+
+                startTimeInput.value = formatDateTime(startTime);
+                endTimeInput.value = formatDateTime(endTime);
+            }
+        });
+    </script>
 </body>
 </html>

@@ -27,12 +27,15 @@ public class SecurityConfig {
 
     /**
      * 密码编码器Bean
-     * 使用BCrypt算法对密码进行加密存储
-     * @return BCryptPasswordEncoder实例
+     * 临时使用NoOp编码器支持明文密码（仅用于开发测试）
+     * 生产环境应使用BCrypt算法对密码进行加密存储
+     * @return PasswordEncoder实例
      */
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+        // 临时使用明文密码编码器，方便开发测试
+        return org.springframework.security.crypto.password.NoOpPasswordEncoder.getInstance();
+        // 生产环境应使用：return new BCryptPasswordEncoder();
     }
 
     /**
