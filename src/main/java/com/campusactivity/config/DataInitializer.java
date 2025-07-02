@@ -36,6 +36,8 @@ public class DataInitializer implements CommandLineRunner {
             admin.setUsername("admin");
             admin.setPassword(passwordEncoder.encode("admin123")); // 密码加密存储
             admin.setRole("ADMIN"); // 设置管理员角色
+            admin.setEmail("admin@xmu.edu.cn");
+            admin.setRealName("系统管理员");
             userRepository.save(admin);
 
             // 创建普通用户
@@ -43,6 +45,8 @@ public class DataInitializer implements CommandLineRunner {
             user.setUsername("user");
             user.setPassword(passwordEncoder.encode("user123")); // 密码加密存储
             user.setRole("USER"); // 设置普通用户角色
+            user.setEmail("user@xmu.edu.cn");
+            user.setRealName("测试用户");
             userRepository.save(user);
 
             // 输出初始化信息，方便开发测试
