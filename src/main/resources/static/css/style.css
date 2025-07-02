@@ -361,3 +361,13 @@ footer {
     color: #00bcd4;
     text-decoration: underline;
 }
+/*给超链接增加了个悬浮效果*/
+.admin-note a {
+    color: #00bcd4;
+    transition: color 0.3s ease;
+    text-decoration: underline;
+}
+
+.admin-note a:hover {
+    color: #0097a7;
+}
