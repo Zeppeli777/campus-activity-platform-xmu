@@ -11,7 +11,7 @@ INSERT INTO user (username, password, role, email, real_name) VALUES ('admin', '
 INSERT INTO user (username, password, role, email, real_name) VALUES ('student1', 'student123', 'USER', 'student1@stu.xmu.edu.cn', '张三');
 INSERT INTO user (username, password, role, email, real_name) VALUES ('student2', 'student123', 'USER', 'student2@stu.xmu.edu.cn', '李四');
 INSERT INTO user (username, password, role, email, real_name) VALUES ('student3', 'student123', 'USER', 'student3@stu.xmu.edu.cn', '王五');
-INSERT INTO user (username, password, role, email, real_name) VALUES ('teacher1', 'teacher123', 'USER', 'teacher1@xmu.edu.cn', '赵老师');
+INSERT INTO user (username, password, role, email, real_name) VALUES ('teacher1', 'teacher123', 'ADMIN', 'teacher1@xmu.edu.cn', '赵老师');
 
 -- 初始化活动数据
 INSERT INTO activity (title, description, start_time, end_time, capacity, location, activity_type_id) VALUES
