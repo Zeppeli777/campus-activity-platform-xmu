@@ -1,13 +1,18 @@
 package com.campusactivity.controller.web;
 
 import com.campusactivity.entity.Activity;
+import com.campusactivity.entity.ActivityType;
 import com.campusactivity.service.ActivityService;
+import com.campusactivity.service.ActivityTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 @Controller
@@ -15,6 +20,9 @@ public class WebController {
     
     @Autowired
     private ActivityService activityService;
+
+    @Autowired
+    private ActivityTypeService activityTypeService;
     
     /**
      * 首页 - 显示欢迎页面和快速导航
@@ -60,6 +68,156 @@ public class WebController {
         model.addAttribute("activities", activities);
         model.addAttribute("title", "管理员活动列表");
         return "admin/activity-list";
+    }
+
+    /**
+     * 管理员活动详情页面
+     */
+    @GetMapping("/admin/activities/page/{id}")
+    public String adminActivityDetail(@PathVariable Long id, Model model) {
+        Activity activity = activityService.getActivityById(id);
+        if (activity == null) {
+            return "redirect:/admin/activities/page";
+        }
+        model.addAttribute("activity", activity);
+        model.addAttribute("title", "活动详情 - " + activity.getTitle());
+        return "admin/activity-detail";
+    }
+
+    /**
+     * 显示新增活动表单页面
+     */
+    @GetMapping("/admin/activities/new")
+    public String showCreateActivityForm(Model model) {
+        List<ActivityType> activityTypes = activityTypeService.getAllActivityTypes();
+        model.addAttribute("activityTypes", activityTypes);
+        model.addAttribute("activity", new Activity());
+        model.addAttribute("title", "新增活动");
+        return "admin/activity-form";
+    }
+
+    /**
+     * 处理新增活动表单提交
+     */
+    @PostMapping("/admin/activities/new")
+    public String createActivity(@RequestParam String title,
+                                @RequestParam String description,
+                                @RequestParam String startTime,
+                                @RequestParam String endTime,
+                                @RequestParam String location,
+                                @RequestParam(required = false) Integer capacity,
+                                @RequestParam(required = false) Long activityTypeId,
+                                RedirectAttributes redirectAttributes) {
+        try {
+            // 创建新活动对象
+            Activity activity = new Activity();
+            activity.setTitle(title);
+            activity.setDescription(description);
+            activity.setLocation(location);
+            activity.setCapacity(capacity);
+
+            // 解析时间
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
+            if (startTime != null && !startTime.isEmpty()) {
+                activity.setStartTime(dateFormat.parse(startTime));
+            }
+            if (endTime != null && !endTime.isEmpty()) {
+                activity.setEndTime(dateFormat.parse(endTime));
+            }
+
+            // 设置活动类型
+            if (activityTypeId != null) {
+                ActivityType activityType = activityTypeService.getActivityTypeById(activityTypeId);
+                activity.setActivityType(activityType);
+            }
+
+            // 保存活动
+            activityService.createActivity(activity);
+
+            redirectAttributes.addFlashAttribute("successMessage", "活动创建成功！");
+            return "redirect:/admin/activities/page";
+
+        } catch (ParseException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "时间格式错误，请重新输入！");
+            return "redirect:/admin/activities/new";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "创建活动失败：" + e.getMessage());
+            return "redirect:/admin/activities/new";
+        }
+    }
+
+    /**
+     * 显示编辑活动表单页面
+     */
+    @GetMapping("/admin/activities/edit/{id}")
+    public String showEditActivityForm(@PathVariable Long id, Model model) {
+        Activity activity = activityService.getActivityById(id);
+        if (activity == null) {
+            return "redirect:/admin/activities/page";
+        }
+
+        List<ActivityType> activityTypes = activityTypeService.getAllActivityTypes();
+        model.addAttribute("activityTypes", activityTypes);
+        model.addAttribute("activity", activity);
+        model.addAttribute("title", "编辑活动 - " + activity.getTitle());
+        model.addAttribute("isEdit", true);
+        return "admin/activity-form";
+    }
+
+    /**
+     * 处理编辑活动表单提交
+     */
+    @PostMapping("/admin/activities/edit/{id}")
+    public String updateActivity(@PathVariable Long id,
+                                @RequestParam String title,
+                                @RequestParam String description,
+                                @RequestParam String startTime,
+                                @RequestParam String endTime,
+                                @RequestParam String location,
+                                @RequestParam(required = false) Integer capacity,
+                                @RequestParam(required = false) Long activityTypeId,
+                                RedirectAttributes redirectAttributes) {
+        try {
+            Activity activity = activityService.getActivityById(id);
+            if (activity == null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "活动不存在！");
+                return "redirect:/admin/activities/page";
+            }
+
+            // 更新活动信息
+            activity.setTitle(title);
+            activity.setDescription(description);
+            activity.setLocation(location);
+            activity.setCapacity(capacity);
+
+            // 解析时间
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
+            if (startTime != null && !startTime.isEmpty()) {
+                activity.setStartTime(dateFormat.parse(startTime));
+            }
+            if (endTime != null && !endTime.isEmpty()) {
+                activity.setEndTime(dateFormat.parse(endTime));
+            }
+
+            // 设置活动类型
+            if (activityTypeId != null) {
+                ActivityType activityType = activityTypeService.getActivityTypeById(activityTypeId);
+                activity.setActivityType(activityType);
+            }
+
+            // 保存活动
+            activityService.updateActivity(id, activity);
+
+            redirectAttributes.addFlashAttribute("successMessage", "活动更新成功！");
+            return "redirect:/admin/activities/page";
+
+        } catch (ParseException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "时间格式错误，请重新输入！");
+            return "redirect:/admin/activities/edit/" + id;
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "更新活动失败：" + e.getMessage());
+            return "redirect:/admin/activities/edit/" + id;
+        }
     }
     
     /**

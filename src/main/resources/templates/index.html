@@ -18,6 +18,7 @@
                 <li><a href="/user/activities/page">用户活动</a></li>
                 <li><a href="/admin/activities/page">管理员活动</a></li>
                 <li><a href="/user/my-registrations">我的报名</a></li>
+                <li><a href="/login" class="login-link">登录</a></li>
             </ul>
         </nav>
     </div>
@@ -47,7 +48,10 @@
         <div class="action-card">
             <h3>活动管理</h3>
             <p>管理员功能：创建和管理活动</p>
-            <a href="/admin/activities/page" class="btn btn-admin">管理活动</a>
+            <div class="admin-access">
+                <a href="/admin/activities/page" class="btn btn-admin">管理活动</a>
+                <small class="admin-note">需要管理员权限，<a href="/login">点击登录</a></small>
+            </div>
         </div>
     </section>
 </main>
