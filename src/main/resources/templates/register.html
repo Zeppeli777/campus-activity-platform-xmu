@@ -1,18 +1,59 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
 <head>
+    <meta charset="UTF-8">
     <title>用户注册</title>
+    <link rel="stylesheet" th:href="@{/static/css/style.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
-<h2>学生用户注册</h2>
-<form th:action="@{/register}" method="post">
-    <label>用户名: <input type="text" name="username" /></label><br/>
-    <label>密码: <input type="password" name="password" /></label><br/>
-    <button type="submit">注册</button>
-</form>
 
-<p th:if="${error}" th:text="${error}" style="color:red"></p>
-<p th:if="${success}" th:text="${success}" style="color:green"></p>
-<a th:href="@{/login}">已有账户？点击登录</a>
+<!-- 统一页眉 -->
+<header id="header">
+    <div class="container">
+        <h1>校园活动平台</h1>
+        <nav>
+            <ul>
+                <li><a href="/">首页</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
+
+<!-- 注册表单内容 -->
+<main class="container" style="max-width: 500px; margin: 60px auto; background-color: #fff; padding: 40px 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+    <h2 style="text-align: center; color: #2d3e50; margin-bottom: 30px;">学生用户注册</h2>
+
+    <form th:action="@{/register}" method="post" style="display: flex; flex-direction: column; gap: 20px;">
+        <div>
+            <label for="username" style="display: block; margin-bottom: 6px; font-weight: bold; color: #444;">用户名</label>
+            <input type="text" id="username" name="username" placeholder="请输入用户名" required
+                   style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px;">
+        </div>
+
+        <div>
+            <label for="password" style="display: block; margin-bottom: 6px; font-weight: bold; color: #444;">密码</label>
+            <input type="password" id="password" name="password" placeholder="请输入密码" required
+                   style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px;">
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%;">注册</button>
+    </form>
+
+    <p th:if="${error}" th:text="${error}" style="color: #e53935; text-align: center; margin-top: 15px;"></p>
+    <p th:if="${success}" th:text="${success}" style="color: #43a047; text-align: center; margin-top: 15px;"></p>
+
+    <p style="text-align: center; margin-top: 20px;">
+        已有账户？<a th:href="@{/login}" style="color: #00bcd4; text-decoration: underline;">点击登录</a>
+    </p>
+</main>
+
+<!-- 统一页脚 -->
+<footer id="footer">
+    <div class="container">
+        <p>&copy; 2025 校园活动平台. 保留所有权利.</p>
+    </div>
+</footer>
+
 </body>
 </html>
