@@ -96,18 +96,18 @@ public class WebController {
     }
     
     /**
-     * 管理员活动页面
+     * 活动管理页面
      */
     @GetMapping("/admin/activities/page")
     public String adminActivities(Model model) {
         List<Activity> activities = activityService.getAllActivities();
         model.addAttribute("activities", activities);
-        model.addAttribute("title", "管理员活动列表");
+        model.addAttribute("title", "活动管理列表");
         return "admin/activity-list";
     }
 
     /**
-     * 管理员活动详情页面
+     * 活动管理详情页面
      */
     @GetMapping("/admin/activities/page/{id}")
     public String adminActivityDetail(@PathVariable Long id, Model model) {

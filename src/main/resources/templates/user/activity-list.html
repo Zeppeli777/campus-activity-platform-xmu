@@ -29,7 +29,7 @@
             <ul>
                 <li><a href="/">首页</a></li>
                 <li><a href="/user/activities/page" class="active">用户活动</a></li>
-                <li><a href="/admin/activities/page">管理员活动</a></li>
+                <li><a href="/admin/activities/page">活动管理</a></li>
                 <li><a href="/user/my-registrations">我的报名</a></li>
             </ul>
         </nav>
@@ -38,18 +38,18 @@
     <main id="content">
         <h1>用户活动列表</h1>
 
-        <!-- 用户选择区域 -->
-        <div class="user-selection" style="margin-bottom: 20px;">
-            <label for="userSelect">选择用户查看状态：</label>
-            <select id="userSelect" onchange="changeUser()">
-                <option value="">请选择用户</option>
-                <option value="1" th:selected="${currentUserId == 1}">管理员</option>
-                <option value="2" th:selected="${currentUserId == 2}">张三</option>
-                <option value="3" th:selected="${currentUserId == 3}">李四</option>
-                <option value="4" th:selected="${currentUserId == 4}">王五</option>
-                <option value="5" th:selected="${currentUserId == 5}">赵老师</option>
-            </select>
-        </div>
+        <!-- 用户选择区域（去掉该功能） -->
+<!--        <div class="user-selection" style="margin-bottom: 20px;">-->
+<!--            <label for="userSelect">选择用户查看状态：</label>-->
+<!--            <select id="userSelect" onchange="changeUser()">-->
+<!--                <option value="">请选择用户</option>-->
+<!--                <option value="1" th:selected="${currentUserId == 1}">管理员</option>-->
+<!--                <option value="2" th:selected="${currentUserId == 2}">张三</option>-->
+<!--                <option value="3" th:selected="${currentUserId == 3}">李四</option>-->
+<!--                <option value="4" th:selected="${currentUserId == 4}">王五</option>-->
+<!--                <option value="5" th:selected="${currentUserId == 5}">赵老师</option>-->
+<!--            </select>-->
+<!--        </div>-->
 
         <div class="activity-list">
             <div th:if="${activities != null and !activities.isEmpty()}">
@@ -60,7 +60,8 @@
                               th:class="'activity-status status-' + ${activityStatuses.get(activity.id) == '可报名' ? 'available' : (activityStatuses.get(activity.id) == '已满额' ? 'full' : (activityStatuses.get(activity.id) == '已结束' ? 'ended' : 'registered'))}"
                               th:text="${activityStatuses.get(activity.id)}">状态</span>
                     </h3>
-                    <p th:text="${activity.description}">活动描述</p>
+<!--                    在该页面去掉活动描述-->
+<!--                    <p th:text="${activity.description}">活动描述</p>-->
                     <div class="activity-meta">
                         <span th:if="${activity.startTime}" th:text="'开始时间: ' + ${#dates.format(activity.startTime, 'yyyy-MM-dd HH:mm')}">开始时间</span>
                         <span th:if="${activity.endTime}" th:text="'结束时间: ' + ${#dates.format(activity.endTime, 'yyyy-MM-dd HH:mm')}">结束时间</span>
