@@ -99,7 +99,7 @@
                                         <a th:href="@{/admin/activities/edit/{id}(id=${activity.id})}"
                                            class="btn btn-sm btn-warning" title="编辑活动">编辑</a>
                                         <a th:href="@{/admin/activities/{id}/registrations(id=${activity.id})}"
-                                           class="btn btn-sm btn-secondary" title="报名管理">报名</a>
+                                           class="btn btn-sm btn-secondary" title="报名管理">报名名单</a>
                                         <button th:onclick="'deleteActivity(' + ${activity.id} + ')'"
                                                 class="btn btn-sm btn-danger" title="删除活动">删除</button>
                                     </td>

@@ -1,14 +1,229 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>管理员统计信息</title>
+    <title>活动报名统计</title>
     <link rel="stylesheet" th:href="@{/static/css/style.css}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- 加上这一行 -->
 </head>
 <body>
-    <header th:replace="layout/header :: header"></header>
-    <h1>管理员统计信息</h1>
-    <!-- 统计信息内容 -->
-    <footer th:replace="layout/footer :: footer"></footer>
+    <header id="header">
+        <div class="container">
+            <h1>校园活动平台 - 管理后台</h1>
+            <nav>
+                <ul>
+                    <li><a href="/">首页</a></li>
+                    <li><a href="/user/activities/page">用户活动</a></li>
+                    <li><a href="/admin/activities/page">管理员活动</a></li>
+                    <li><a href="/user/my-registrations">我的报名</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main id="content">
+        <div class="container">
+            <div class="breadcrumb">
+                <a href="/admin/activities/page">活动管理</a> &gt; <span>报名统计</span>
+            </div>
+            <h2>活动报名统计</h2>
+            <!-- 删除按钮 -->
+<div style="margin-bottom: 10px;">
+    <button class="btn btn-primary" onclick="exportStatisticsToCSV()">导出为 CSV</button>
+    <a href="/admin/activities/page" class="btn btn-secondary" style="margin-left: 10px;">返回活动列表</a>
+    <button class="btn btn-primary" onclick="showBarChart('type')" style="margin-left: 10px;">类型柱状图</button>
+    <button class="btn btn-primary" onclick="showBarChart('activity')" style="margin-left: 10px;">活动柱状图</button>
+</div>
+            <table class="activity-table" id="statisticsTable">
+                <thead>
+                    <tr>
+                        <th>活动ID</th>
+                        <th>标题</th>
+                        <th>类型</th>
+                        <th>开始时间</th>
+                        <th>结束时间</th>
+                        <th>容量</th>
+                        <th>已报名人数</th>
+                        <th>剩余名额</th>
+                        <th>报名率</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="activity : ${activities}">
+                        <td th:text="${activity.id}"></td>
+                        <td th:text="${activity.title}"></td>
+                        <td th:text="${activity.activityType != null ? activity.activityType.name : '未分类'}"></td>
+                        <td th:text="${#dates.format(activity.startTime, 'yyyy-MM-dd HH:mm')}"></td>
+                        <td th:text="${#dates.format(activity.endTime, 'yyyy-MM-dd HH:mm')}"></td>
+                        <td th:text="${activity.capacity != null ? activity.capacity : '无限制'}"></td>
+                        <td th:text="${registrationCountMap[activity.id] ?: 0}"></td>
+                        <td>
+                            <span th:if="${activity.capacity != null and activity.capacity > 0}"
+                                  th:text="${activity.capacity - (registrationCountMap[activity.id] ?: 0)}"></span>
+                            <span th:unless="${activity.capacity != null and activity.capacity > 0}">-</span>
+                        </td>
+                        <td>
+                            <span th:if="${activity.capacity != null and activity.capacity > 0}"
+                                  th:text="${#numbers.formatDecimal((registrationCountMap[activity.id] ?: 0) * 100.0 / activity.capacity, 1, 2) + '%'}"></span>
+                            <span th:unless="${activity.capacity != null and activity.capacity > 0}">-</span>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(activities)}">
+                        <td colspan="9" class="empty-state">暂无活动</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div id="chartContainer" style="display:none;max-width:900px;margin:30px auto;">
+                <canvas id="registrationBarChart" height="120"></canvas>
+            </div>
+        </div>
+    </main>
+
+    <footer id="footer">
+        <div class="container">
+            <p>&copy; 2025 校园活动平台. 保留所有权利.</p>
+        </div>
+    </footer>
+    <script>
+function exportStatisticsToCSV() {
+    const table = document.getElementById('statisticsTable');
+    let csv = '';
+    // 处理表头
+    const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.innerText);
+    csv += headers.join(',') + '\n';
+    // 处理数据行
+    const rows = table.querySelectorAll('tbody tr');
+    rows.forEach(row => {
+        // 跳过空状态行
+        if (row.querySelector('.empty-state')) return;
+        const cols = Array.from(row.querySelectorAll('td')).map(td => `"${td.innerText.replace(/"/g, '""')}"`);
+        csv += cols.join(',') + '\n';
+    });
+    // 加BOM解决Excel中文乱码
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'activity-statistics.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+function getLabelsAndDataFromTable() {
+    var labels = [];
+    var data = [];
+    var table = document.getElementById('statisticsTable');
+    var rows = table.querySelectorAll('tbody tr');
+    rows.forEach(row => {
+        if (row.querySelector('.empty-state')) return;
+        labels.push(row.children[1].innerText); // 标题
+        data.push(Number(row.children[6].innerText)); // 已报名人数
+    });
+    return {labels, data};
+}
+
+function getTypeAndDataFromTable() {
+    var typeMap = {};
+    var table = document.getElementById('statisticsTable');
+    var rows = table.querySelectorAll('tbody tr');
+    rows.forEach(row => {
+        if (row.querySelector('.empty-state')) return;
+        var type = row.children[2].innerText; // 类型
+        var count = Number(row.children[6].innerText); // 已报名人数
+        if (!typeMap[type]) {
+            typeMap[type] = 0;
+        }
+        typeMap[type] += count;
+    });
+    var types = Object.keys(typeMap);
+    var data = types.map(t => typeMap[t]);
+    return {labels: types, data: data};
+}
+
+function getStartTimeAndDataFromTable() {
+    var timeMap = {};
+    var table = document.getElementById('statisticsTable');
+    var rows = table.querySelectorAll('tbody tr');
+    rows.forEach(row => {
+        if (row.querySelector('.empty-state')) return;
+        var time = row.children[3].innerText; // 开始时间
+        var count = Number(row.children[6].innerText); // 已报名人数
+        if (!timeMap[time]) {
+            timeMap[time] = 0;
+        }
+        timeMap[time] += count;
+    });
+    var times = Object.keys(timeMap);
+    var data = times.map(t => timeMap[t]);
+    return {labels: times, data: data};
+}
+
+function showBarChart(mode) {
+    var chartContainer = document.getElementById('chartContainer');
+    // 如果已显示，则关闭并销毁
+    if (chartContainer.style.display === 'block' && window.barChartMode === mode) {
+        chartContainer.style.display = 'none';
+        if (window.registrationChart) {
+            window.registrationChart.destroy();
+            window.registrationChart = null;
+        }
+        window.barChartRendered = false;
+        window.barChartMode = null;
+        return;
+    }
+    chartContainer.style.display = 'block';
+    if (window.registrationChart) {
+        window.registrationChart.destroy();
+        window.registrationChart = null;
+    }
+    window.barChartRendered = true;
+    window.barChartMode = mode;
+    var ctx = document.getElementById('registrationBarChart').getContext('2d');
+    var result, title, xlabel;
+    if (mode === 'type') {
+        result = getTypeAndDataFromTable();
+        title = '各类型活动已报名人数';
+        xlabel = '活动类型';
+    } else if (mode === 'activity') {
+        result = getLabelsAndDataFromTable();
+        title = '各活动已报名人数';
+        xlabel = '活动';
+    } else {
+        return;
+    }
+    window.registrationChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: result.labels,
+            datasets: [{
+                label: '已报名人数',
+                data: result.data,
+                backgroundColor: 'rgba(0,188,212,0.7)'
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false },
+                title: { display: true, text: title }
+            },
+            scales: {
+                x: { title: { display: true, text: xlabel } },
+                y: {
+                    title: { display: true, text: '人数' },
+                    beginAtZero: true,
+                    ticks: {
+                        precision: 0,
+                        stepSize: 1,
+                        callback: function(value) { return Number(value); }
+                    }
+                }
+            }
+        }
+    });
+}
+</script>
 </body>
 </html>

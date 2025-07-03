@@ -14,6 +14,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -310,4 +311,40 @@ public class WebController {
         model.addAttribute("title", "活动大厅");
         return "activity-hall";
     }
+    /**
+     * 单活动报名信息
+     */
+
+    @GetMapping("/admin/activities/{id}/registrations")
+    public String registrations(@PathVariable Long id, Model model) {
+        Activity activity = activityService.getActivityById(id);
+        if (activity == null) {
+            model.addAttribute("errorMessage", "活动不存在！");
+            return "error/404"; // 或自定义一个友好错误页面
+        }
+        List<Registration> registrations = registrationService.getRegistrationsByActivityId(id);
+        model.addAttribute("activity", activity);
+        model.addAttribute("registrations", registrations);
+        return "admin/activity-registrations";
+    }
+    /**
+     * 统计报名信息
+     */
+    
+    /**
+     * 统计所有活动报名人数页面
+     */
+    @GetMapping("/admin/statistics")
+    public String activityStatistics(Model model) {
+        List<Activity> activities = activityService.getAllActivities();
+        // 获取每个活动的报名人数统计
+        java.util.Map<Long, Long> registrationCountMap = registrationService.countRegistrationsForAllActivities();
+        model.addAttribute("activities", activities != null ? activities : new ArrayList<>());
+        model.addAttribute("registrationCountMap", registrationCountMap != null ? registrationCountMap : new HashMap<>());
+        model.addAttribute("title", "活动报名统计");
+        return "admin/statistics";
+    }
+
 }
+
+

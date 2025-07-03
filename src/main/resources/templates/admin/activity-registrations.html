@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="'报名管理 - ' + ${activity.title}">报名管理</title>
+    <link rel="stylesheet" th:href="@{/static/css/style.css}">
+</head>
+<body>
+    <header th:replace="layout/header :: header"></header>
+
+    <main id="content">
+        <div class="container">
+            <!-- 先显示活动名称，再显示大标题 -->
+            <h1 style="text-align:center;margin-top:30px;" th:text="${activity.title}">活动名称</h1>
+            <h2 style="text-align:center;margin-bottom:30px;">活动报名情况</h2>
+            <div th:if="${activity}">
+                <div class="activity-info-grid" style="margin-bottom: 30px;">
+                    <p>
+                        <strong>活动描述：</strong>
+                        <span th:text="${activity.description}">无描述</span>
+                    </p>
+                    <p>
+                        <strong>开始时间：</strong>
+                        <span th:text="${#dates.format(activity.startTime, 'yyyy-MM-dd HH:mm')}"></span>
+                        <strong>结束时间：</strong>
+                        <span th:text="${#dates.format(activity.endTime, 'yyyy-MM-dd HH:mm')}"></span>
+                    </p>
+                    <p>
+                        <strong>人数上限：</strong>
+                        <span th:text="${activity.capacity}"></span>
+                    </p>
+                    <p>
+                        <strong>报名人数：</strong>
+                        <span th:text="${registrations.size()}"></span>
+                        <strong style="margin-left:20px;">剩余名额：</strong>
+                        <span th:if="${activity.capacity != null and activity.capacity > 0}"
+                              th:text="${activity.capacity - registrations.size()}"></span>
+                        <span th:unless="${activity.capacity != null and activity.capacity > 0}">-</span>
+                        <!-- 新增报名率 -->
+                        <strong style="margin-left:20px;">报名率：</strong>
+                        <span th:if="${activity.capacity != null and activity.capacity > 0}"
+                              th:text="${#numbers.formatDecimal(registrations.size() * 100.0 / activity.capacity, 1, 2)} + '%'"></span>
+                        <span th:unless="${activity.capacity != null and activity.capacity > 0}">-</span>
+                    </p>
+                </div>
+                <div class="activity-table-container">
+                    <div style="margin-bottom: 10px;">
+                        <button class="btn btn-primary" onclick="exportRegistrationsToCSV()">导出为 CSV</button>
+                        <a href="/admin/activities/page" class="btn btn-secondary" style="margin-left: 10px;">返回活动列表</a>
+                    </div>
+                    <table class="activity-table" id="registrationTable">
+                        <thead>
+                            <tr>
+                                <th>序号</th>
+                                <th>用户名</th>
+                                <th>姓名</th>
+                                <th>报名时间</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="reg,iter : ${registrations}">
+                                <td th:text="${iter.index + 1}"></td>
+                                <td th:text="${reg.user != null ? reg.user.username : '未知'}"></td>
+                                <td th:text="${reg.user != null ? reg.user.realName : '未知'}"></td>
+                                <td th:text="${#dates.format(reg.registrationTime, 'yyyy-MM-dd HH:mm')}"
+                                    th:attr="data-value=${#dates.format(reg.registrationTime, 'yyyy-MM-dd HH:mm:ss')}"></td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(registrations)}">
+                                <td colspan="4" class="empty-state">
+                                    <h3>暂无报名</h3>
+                                    <p>当前活动还没有用户报名。</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div th:unless="${activity}" class="empty-state">
+                <h3>活动不存在！</h3>
+                <a href="/admin/activities/page" class="btn btn-primary">返回活动列表</a>
+            </div>
+        </div>
+    </main>
+
+    <footer th:replace="layout/footer :: footer"></footer>
+    <script>
+    function exportRegistrationsToCSV() {
+        const table = document.getElementById('registrationTable');
+        let csv = '';
+        // 处理表头
+        const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.innerText);
+        csv += headers.join(',') + '\n';
+        // 处理数据行
+        const rows = table.querySelectorAll('tbody tr');
+        rows.forEach(row => {
+            // 跳过空状态行
+            if (row.querySelector('.empty-state')) return;
+            const cols = Array.from(row.querySelectorAll('td')).map(td => {
+                // 优先取 data-value（如报名时间），否则取 innerText
+                return `"${(td.getAttribute('data-value') || td.innerText).replace(/"/g, '""')}"`;
+            });
+            csv += cols.join(',') + '\n';
+        });
+        // 加BOM解决Excel中文乱码
+        const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'registrations.csv';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+    </script>
+</body>
+</html>

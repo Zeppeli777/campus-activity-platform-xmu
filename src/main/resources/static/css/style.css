@@ -99,11 +99,13 @@ nav a:hover {
     border-radius: 6px;
     font-weight: bold;
     transition: background-color 0.3s ease;
+    cursor: pointer;
 }
 
 .btn-primary {
     background-color: #00bcd4;
     color: #fff;
+    border: none; /* 去掉黑色边框 */
 }
 
 .btn-primary:hover {
@@ -113,6 +115,7 @@ nav a:hover {
 .btn-secondary {
     background-color: #4caf50;
     color: #fff;
+    cursor: pointer;
 }
 
 .btn-secondary:hover {
@@ -296,78 +299,4 @@ footer {
 .empty-state p {
     color: #6c757d;
     margin-bottom: 20px;
-}
-/*新增内容*/
-/* 注册/登录表单样式 */
-.form-container {
-    max-width: 400px;
-    margin: 80px auto;
-    background-color: #fff;
-    padding: 40px 30px;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    text-align: center;
-}
-
-.form-title {
-    font-size: 24px;
-    margin-bottom: 30px;
-    color: #2d3e50;
-}
-
-.form-card label {
-    display: block;
-    text-align: left;
-    margin-bottom: 8px;
-    font-weight: bold;
-    color: #444;
-}
-
-.form-card input {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 20px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    box-sizing: border-box;
-    transition: border 0.3s ease;
-    font-size: 14px;
-}
-
-.form-card input:focus {
-    border-color: #00bcd4;
-    outline: none;
-}
-
-.form-message {
-    margin-top: 10px;
-    font-size: 14px;
-}
-
-.form-message.error {
-    color: #e53935;
-}
-
-.form-message.success {
-    color: #43a047;
-}
-
-.form-footer {
-    margin-top: 20px;
-    font-size: 14px;
-}
-
-.form-footer a {
-    color: #00bcd4;
-    text-decoration: underline;
-}
-/*给超链接增加了个悬浮效果*/
-.admin-note a {
-    color: #00bcd4;
-    transition: color 0.3s ease;
-    text-decoration: underline;
-}
-
-.admin-note a:hover {
-    color: #0097a7;
 }
