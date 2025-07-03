@@ -43,20 +43,7 @@
 
     <main id="content">
         <h1>我的报名</h1>
-
-        <!-- 用户选择区域 -->
-        <div class="user-selection">
-            <label for="userSelect">选择用户查看报名记录：</label>
-            <select id="userSelect" onchange="changeUser()">
-                <option value="">请选择用户</option>
-                <option value="1" th:selected="${currentUserId == 1}">管理员</option>
-                <option value="2" th:selected="${currentUserId == 2}">张三</option>
-                <option value="3" th:selected="${currentUserId == 3}">李四</option>
-                <option value="4" th:selected="${currentUserId == 4}">王五</option>
-                <option value="5" th:selected="${currentUserId == 5}">赵老师</option>
-            </select>
-        </div>
-
+        <h2>当前用户：<span th:text="${currentUserRealname}"></span></h2>
         <div class="registration-list">
             <div th:if="${registrations != null and !registrations.isEmpty()}">
                 <div th:each="registration : ${registrations}" class="registration-card">

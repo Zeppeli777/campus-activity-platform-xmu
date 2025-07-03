@@ -1,14 +1,73 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>用户活动详情</title>
+    <title th:text="${title}"></title>
     <link rel="stylesheet" th:href="@{/static/css/style.css}">
+    <style>
+        .activity-detail {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .activity-header {
+            border-bottom: 1px solid #eee;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+        .activity-meta {
+            color: #666;
+            font-size: 14px;
+            margin: 10px 0;
+        }
+        .activity-actions {
+            margin: 20px 0;
+        }
+        .btn {
+            display: inline-block;
+            padding: 8px 15px;
+            background-color: #4285f4;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .btn-secondary {
+            background-color: #f5f5f5;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+    </style>
 </head>
+
 <body>
-    <header th:replace="layout/header :: header"></header>
-    <h1>用户活动详情</h1>
-    <!-- 活动详情内容 -->
-    <footer th:replace="layout/footer :: footer"></footer>
-</body>
-</html>
+<header th:replace="layout/header :: header"></header>
+<h1>用户活动详情</h1>
+<main class="activity-detail">
+    <div class="activity-header">
+        <h1 th:text="${activity.title}">活动标题</h1>
+    </div>
+
+    <div class="activity-content">
+        <p th:text="${activity.description}">活动描述</p>
+
+        <div class="activity-meta">
+            <span th:text="'开始时间: ' + ${#dates.format(activity.startTime, 'yyyy-MM-dd HH:mm')}">开始时间</span>
+        </div>
+        <div class="activity-meta">
+            <span th:text="'结束时间: ' + ${#dates.format(activity.endTime, 'yyyy-MM-dd HH:mm')}">结束时间</span>
+        </div>
+        <div class="activity-meta">
+            <span th:text="'地点: ' + ${activity.location}">活动地点</span>
+        </div>
+        <!-- 已登录用户根据报名状态显示按钮 -->
+        <div>
+            <a href="/user/activities/page" class="btn btn-secondary">返回活动列表</a>
+            <a th:href="@{/user/registrations/enroll(activityId=${activity.id})}"
+               class="btn">立即报名</a>
+            <a th:href="@{/user/my-registrations}"
+               class="btn btn-secondary">查看我的报名</a>
+        </div>
+    </div>
+</main>

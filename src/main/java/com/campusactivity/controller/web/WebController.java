@@ -3,10 +3,14 @@ package com.campusactivity.controller.web;
 import com.campusactivity.entity.Activity;
 import com.campusactivity.entity.ActivityType;
 import com.campusactivity.entity.Registration;
+import com.campusactivity.entity.User;
+import com.campusactivity.repository.UserRepository;
 import com.campusactivity.service.ActivityService;
 import com.campusactivity.service.ActivityTypeService;
 import com.campusactivity.service.RegistrationService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -29,8 +33,12 @@ public class WebController {
     private ActivityTypeService activityTypeService;
 
     @Autowired
+    private UserRepository userRepository;
+    @Autowired
     private RegistrationService registrationService;
-    
+    @Autowired
+    private UserDetailsService userDetailsService;
+
     /**
      * 首页 - 显示欢迎页面和快速导航
      * 可以在这里添加数据，传递给前端模板
@@ -271,16 +279,20 @@ public class WebController {
      * 我的报名页面
      */
     @GetMapping("/user/my-registrations")
-    public String myRegistrations(@RequestParam(required = false) Long userId, Model model) {
-        if (userId != null) {
-            List<Registration> registrations = registrationService.getUserRegistrations(userId);
-            model.addAttribute("registrations", registrations);
-        }
-        model.addAttribute("currentUserId", userId);
+    public String myRegistrations(Model model, Authentication authentication) {
+        String username = authentication.getName();
+        User user = userRepository.findByUsername(username);
+
+        List<Registration> registrations = registrationService.getUserRegistrations(user.getId());
+        model.addAttribute("registrations", registrations);
+        model.addAttribute("currentUserRealname", user.getRealName()); // 传递真实姓名
+        model.addAttribute("currentUsername", username); // 传递用户名
         model.addAttribute("title", "我的报名");
         return "user/my-registrations";
     }
-    
+
+
+
     /**
      * 登录页面
      */
