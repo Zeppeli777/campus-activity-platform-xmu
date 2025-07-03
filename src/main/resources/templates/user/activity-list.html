@@ -4,6 +4,23 @@
     <meta charset="UTF-8">
     <title th:text="${title} ?: '用户活动列表'"></title>
     <link rel="stylesheet" th:href="@{/static/css/style.css}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        .activity-status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        .status-available { background-color: #28a745; color: white; }
+        .status-full { background-color: #dc3545; color: white; }
+        .status-ended { background-color: #6c757d; color: white; }
+        .status-registered { background-color: #007bff; color: white; }
+        .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        .registration-info { font-size: 14px; color: #666; margin-top: 5px; }
+    </style>
 </head>
 <body>
     <header id="header">
@@ -21,10 +38,28 @@
     <main id="content">
         <h1>用户活动列表</h1>
 
+        <!-- 用户选择区域 -->
+        <div class="user-selection" style="margin-bottom: 20px;">
+            <label for="userSelect">选择用户查看状态：</label>
+            <select id="userSelect" onchange="changeUser()">
+                <option value="">请选择用户</option>
+                <option value="1" th:selected="${currentUserId == 1}">管理员</option>
+                <option value="2" th:selected="${currentUserId == 2}">张三</option>
+                <option value="3" th:selected="${currentUserId == 3}">李四</option>
+                <option value="4" th:selected="${currentUserId == 4}">王五</option>
+                <option value="5" th:selected="${currentUserId == 5}">赵老师</option>
+            </select>
+        </div>
+
         <div class="activity-list">
             <div th:if="${activities != null and !activities.isEmpty()}">
                 <div th:each="activity : ${activities}" class="activity-card">
-                    <h3 th:text="${activity.title}">活动标题</h3>
+                    <h3 th:text="${activity.title}">活动标题
+                        <!-- 活动状态标签 -->
+                        <span th:if="${activityStatuses != null}"
+                              th:class="'activity-status status-' + ${activityStatuses.get(activity.id) == '可报名' ? 'available' : (activityStatuses.get(activity.id) == '已满额' ? 'full' : (activityStatuses.get(activity.id) == '已结束' ? 'ended' : 'registered'))}"
+                              th:text="${activityStatuses.get(activity.id)}">状态</span>
+                    </h3>
                     <p th:text="${activity.description}">活动描述</p>
                     <div class="activity-meta">
                         <span th:if="${activity.startTime}" th:text="'开始时间: ' + ${#dates.format(activity.startTime, 'yyyy-MM-dd HH:mm')}">开始时间</span>
@@ -33,9 +68,22 @@
                         <span th:if="${activity.capacity}" th:text="'容量: ' + ${activity.capacity} + '人'">容量</span>
                         <span th:if="${activity.activityType}" th:text="'类型: ' + ${activity.activityType.name}">活动类型</span>
                     </div>
+                    <!-- 报名信息 -->
+                    <div class="registration-info" th:if="${registrationCounts != null}">
+                        <span th:text="'已报名: ' + ${registrationCounts.get(activity.id)} + '人'">已报名人数</span>
+                        <span th:if="${activity.capacity != null}" th:text="' / ' + ${activity.capacity} + '人'">总容量</span>
+                    </div>
                     <div class="activity-actions">
                         <a th:href="@{/user/activities/page/{id}(id=${activity.id})}" class="btn btn-primary">查看详情</a>
-                        <button class="btn btn-success">立即报名</button>
+                        <button th:if="${canRegister != null and canRegister.get(activity.id)}"
+                                class="btn btn-success register-btn"
+                                th:data-activity-id="${activity.id}"
+                                th:data-user-id="${currentUserId}">立即报名</button>
+                        <button th:if="${canRegister == null or !canRegister.get(activity.id)}"
+                                class="btn btn-secondary"
+                                disabled>
+                            <span th:if="${activityStatuses != null}" th:text="${activityStatuses.get(activity.id)}">无法报名</span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -50,5 +98,52 @@
     <footer id="footer">
         <p>&copy; 2025 校园活动平台. 保留所有权利.</p>
     </footer>
+
+    <script>
+        function changeUser() {
+            const userId = document.getElementById('userSelect').value;
+            const currentUrl = new URL(window.location);
+            if (userId) {
+                currentUrl.searchParams.set('userId', userId);
+            } else {
+                currentUrl.searchParams.delete('userId');
+            }
+            window.location.href = currentUrl.toString();
+        }
+
+        // 报名功能
+        $(document).ready(function() {
+            $('.register-btn').click(function() {
+                const activityId = $(this).data('activity-id');
+                const userId = $(this).data('user-id');
+                const button = $(this);
+
+                if (!userId) {
+                    alert('请先选择用户');
+                    return;
+                }
+
+                button.prop('disabled', true).text('报名中...');
+
+                $.post('/user/activities/register', {
+                    activityId: activityId,
+                    userId: userId
+                })
+                .done(function(response) {
+                    if (response.success) {
+                        alert('报名成功！');
+                        location.reload(); // 刷新页面更新状态
+                    } else {
+                        alert('报名失败：' + response.message);
+                        button.prop('disabled', false).text('立即报名');
+                    }
+                })
+                .fail(function() {
+                    alert('报名失败，请稍后重试');
+                    button.prop('disabled', false).text('立即报名');
+                });
+            });
+        });
+    </script>
 </body>
 </html>

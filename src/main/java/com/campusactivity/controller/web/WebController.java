@@ -2,8 +2,10 @@ package com.campusactivity.controller.web;
 
 import com.campusactivity.entity.Activity;
 import com.campusactivity.entity.ActivityType;
+import com.campusactivity.entity.Registration;
 import com.campusactivity.service.ActivityService;
 import com.campusactivity.service.ActivityTypeService;
+import com.campusactivity.service.RegistrationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -13,7 +15,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 public class WebController {
@@ -23,6 +27,9 @@ public class WebController {
 
     @Autowired
     private ActivityTypeService activityTypeService;
+
+    @Autowired
+    private RegistrationService registrationService;
     
     /**
      * 首页 - 显示欢迎页面和快速导航
@@ -41,9 +48,29 @@ public class WebController {
      * 用户活动页面
      */
     @GetMapping("/user/activities/page")
-    public String userActivities(Model model) {
+    public String userActivities(Model model, @RequestParam(required = false) Long userId) {
         List<Activity> activities = activityService.getAllActivities();
+
+        // 为每个活动添加状态信息
+        Map<Long, String> activityStatuses = new HashMap<>();
+        Map<Long, Long> registrationCounts = new HashMap<>();
+        Map<Long, Boolean> canRegister = new HashMap<>();
+
+        for (Activity activity : activities) {
+            String status = activityService.getActivityStatus(activity.getId(), userId);
+            Long count = activityService.getRegistrationCount(activity.getId());
+            boolean canReg = activityService.canUserRegister(activity.getId(), userId);
+
+            activityStatuses.put(activity.getId(), status);
+            registrationCounts.put(activity.getId(), count);
+            canRegister.put(activity.getId(), canReg);
+        }
+
         model.addAttribute("activities", activities);
+        model.addAttribute("activityStatuses", activityStatuses);
+        model.addAttribute("registrationCounts", registrationCounts);
+        model.addAttribute("canRegister", canRegister);
+        model.addAttribute("currentUserId", userId);
         model.addAttribute("title", "用户活动列表");
         return "user/activity-list";
     }
@@ -221,10 +248,35 @@ public class WebController {
     }
     
     /**
+     * 报名活动
+     */
+    @PostMapping("/user/activities/register")
+    @ResponseBody
+    public Map<String, Object> registerActivity(@RequestParam Long activityId,
+                                               @RequestParam Long userId) {
+        Map<String, Object> result = new HashMap<>();
+        try {
+            Registration registration = registrationService.registerUserForActivity(userId, activityId);
+            result.put("success", true);
+            result.put("message", "报名成功！");
+            result.put("registrationId", registration.getId());
+        } catch (Exception e) {
+            result.put("success", false);
+            result.put("message", e.getMessage());
+        }
+        return result;
+    }
+
+    /**
      * 我的报名页面
      */
     @GetMapping("/user/my-registrations")
-    public String myRegistrations(Model model) {
+    public String myRegistrations(@RequestParam(required = false) Long userId, Model model) {
+        if (userId != null) {
+            List<Registration> registrations = registrationService.getUserRegistrations(userId);
+            model.addAttribute("registrations", registrations);
+        }
+        model.addAttribute("currentUserId", userId);
         model.addAttribute("title", "我的报名");
         return "user/my-registrations";
     }

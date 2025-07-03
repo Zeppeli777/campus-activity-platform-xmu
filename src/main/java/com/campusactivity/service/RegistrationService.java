@@ -9,4 +9,9 @@ public interface RegistrationService {
     Registration createRegistration(Registration registration);
     Registration updateRegistration(Long id, Registration registration);
     void deleteRegistration(Long id);
+
+    // 新增方法
+    Registration registerUserForActivity(Long userId, Long activityId);
+    List<Registration> getUserRegistrations(Long userId);
+    boolean isUserRegistered(Long userId, Long activityId);
 }

@@ -34,4 +34,8 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
     // 统计某用户的报名总数
     @Query("SELECT COUNT(r) FROM Registration r WHERE r.user.id = :userId")
     Long countByUserId(@Param("userId") Long userId);
+
+    // 统计某用户对某活动的报名次数（检查是否已报名）
+    @Query("SELECT COUNT(r) FROM Registration r WHERE r.activity.id = :activityId AND r.user.id = :userId")
+    Long countByActivityIdAndUserId(@Param("activityId") Long activityId, @Param("userId") Long userId);
 }

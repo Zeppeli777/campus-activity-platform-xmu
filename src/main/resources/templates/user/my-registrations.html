@@ -1,14 +1,109 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>我的报名</title>
+    <title th:text="${title} ?: '我的报名'"></title>
     <link rel="stylesheet" th:href="@{/static/css/style.css}">
+    <style>
+        .registration-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            background-color: #f9f9f9;
+        }
+        .registration-meta {
+            color: #666;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        .registration-meta span {
+            margin-right: 15px;
+        }
+        .user-selection {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+        }
+    </style>
 </head>
 <body>
-    <header th:replace="layout/header :: header"></header>
-    <h1>我的报名</h1>
-    <!-- 我的报名内容 -->
-    <footer th:replace="layout/footer :: footer"></footer>
+    <header id="header">
+        <h1>校园活动平台</h1>
+        <nav>
+            <ul>
+                <li><a href="/">首页</a></li>
+                <li><a href="/user/activities/page">用户活动</a></li>
+                <li><a href="/admin/activities/page">管理员活动</a></li>
+                <li><a href="/user/my-registrations" class="active">我的报名</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main id="content">
+        <h1>我的报名</h1>
+
+        <!-- 用户选择区域 -->
+        <div class="user-selection">
+            <label for="userSelect">选择用户查看报名记录：</label>
+            <select id="userSelect" onchange="changeUser()">
+                <option value="">请选择用户</option>
+                <option value="1" th:selected="${currentUserId == 1}">管理员</option>
+                <option value="2" th:selected="${currentUserId == 2}">张三</option>
+                <option value="3" th:selected="${currentUserId == 3}">李四</option>
+                <option value="4" th:selected="${currentUserId == 4}">王五</option>
+                <option value="5" th:selected="${currentUserId == 5}">赵老师</option>
+            </select>
+        </div>
+
+        <div class="registration-list">
+            <div th:if="${registrations != null and !registrations.isEmpty()}">
+                <div th:each="registration : ${registrations}" class="registration-card">
+                    <h3 th:text="${registration.activity.title}">活动标题</h3>
+                    <p th:text="${registration.activity.description}">活动描述</p>
+                    <div class="registration-meta">
+                        <span th:if="${registration.activity.startTime}"
+                              th:text="'开始时间: ' + ${#dates.format(registration.activity.startTime, 'yyyy-MM-dd HH:mm')}">开始时间</span>
+                        <span th:if="${registration.activity.endTime}"
+                              th:text="'结束时间: ' + ${#dates.format(registration.activity.endTime, 'yyyy-MM-dd HH:mm')}">结束时间</span>
+                        <span th:if="${registration.activity.location}"
+                              th:text="'地点: ' + ${registration.activity.location}">地点</span>
+                        <span th:if="${registration.registrationTime}"
+                              th:text="'报名时间: ' + ${#dates.format(registration.registrationTime, 'yyyy-MM-dd HH:mm')}">报名时间</span>
+                    </div>
+                    <div class="activity-actions" style="margin-top: 15px;">
+                        <a th:href="@{/user/activities/page/{id}(id=${registration.activity.id})}" class="btn btn-primary">查看详情</a>
+                    </div>
+                </div>
+            </div>
+
+            <div th:if="${currentUserId == null}" class="no-registrations">
+                <p>请选择用户查看报名记录。</p>
+            </div>
+
+            <div th:if="${currentUserId != null and (registrations == null or registrations.isEmpty())}" class="no-registrations">
+                <p>您还没有报名任何活动。</p>
+                <a href="/user/activities/page" class="btn btn-primary">去看看有什么活动</a>
+            </div>
+        </div>
+    </main>
+
+    <footer id="footer">
+        <p>&copy; 2024 校园活动平台. 保留所有权利.</p>
+    </footer>
+
+    <script>
+        function changeUser() {
+            const userId = document.getElementById('userSelect').value;
+            const currentUrl = new URL(window.location);
+            if (userId) {
+                currentUrl.searchParams.set('userId', userId);
+            } else {
+                currentUrl.searchParams.delete('userId');
+            }
+            window.location.href = currentUrl.toString();
+        }
+    </script>
 </body>
 </html>
