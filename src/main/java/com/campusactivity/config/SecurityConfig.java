@@ -92,6 +92,10 @@ public class SecurityConfig {
                 .defaultSuccessUrl("/", true)  // 登录成功后跳转到首页
                 .permitAll()                   // 登录页面允许所有人访问
                 .and()
+            // 添加访问拒绝处理
+//            .exceptionHandling()
+//                .accessDeniedPage("/error/403") // 指向自定义的403错误页面
+//                .and()
             // 配置登出
             .logout()
                 .logoutSuccessUrl("/login?logout") // 登出后跳转到登录页面

@@ -37,7 +37,7 @@
                     </form>
 
                     <div class="login-messages">
-                        <p class="error-message" th:if="${param.error}">用户名或密码错误</p>
+                        <p class="error-message" th:if="${param.error}" style="color: #e53935;">用户名或密码错误</p>
                         <p class="success-message" th:if="${param.logout}">您已退出登录</p>
                     </div>
 

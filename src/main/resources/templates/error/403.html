@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>403 - 访问被拒绝</title>
+    <link rel="stylesheet" th:href="@{/static/css/style.css}">
+</head>
+<body>
+<header th:replace="layout/header :: header"></header>
+<div class="container">
+    <div class="error-container">
+        <h1>403 - 访问被拒绝</h1>
+        <p>很抱歉，您没有权限访问此页面。</p>
+        <div class="error-actions">
+            <a href="/" class="btn btn-primary">返回首页</a>
+            <a href="/login" class="btn btn-secondary">登录管理员账号</a>
+        </div>
+    </div>
+</div>
+<footer th:replace="layout/footer :: footer"></footer>
+</body>
+</html>
