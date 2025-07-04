@@ -90,8 +90,17 @@ public class WebController {
     @GetMapping("/user/activities/page/{id}")
     public String userActivityDetail(@PathVariable Long id, Model model) {
         Activity activity = activityService.getActivityById(id);
+        if (activity == null) {
+            model.addAttribute("errorMessage", "活动不存在！");
+            return "error/404";
+        }
+
+        // 获取报名人数
+        Long registrationCount = activityService.getRegistrationCount(id);
+
         model.addAttribute("activity", activity);
-        model.addAttribute("title", "活动详情");
+        model.addAttribute("registrationCount", registrationCount);
+        model.addAttribute("title", "活动详情 - " + activity.getTitle());
         return "user/activity-detail";
     }
     

@@ -151,7 +151,7 @@
         <!-- 显示错误消息 -->
         <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>
 
-        <form th:action="${isEdit} ? @{'/admin/activities/edit/' + activity.id} : @{/admin/activities/new}"
+        <form th:action="@{__${isEdit ? '/admin/activities/edit/' + activity.id : '/admin/activities/new'}__}"
               method="post" id="activityForm">
             <div class="form-group">
                 <label for="title">活动标题 <span class="required">*</span></label>

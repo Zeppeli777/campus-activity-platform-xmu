@@ -38,6 +38,38 @@
             color: #333;
             border: 1px solid #ddd;
         }
+        .registration-info {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #4285f4;
+        }
+        .registration-count {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background-color: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 5px;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4285f4, #34a853);
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+        .progress-text {
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+        }
     </style>
 </head>
 
@@ -60,6 +92,24 @@
         </div>
         <div class="activity-meta">
             <span th:text="'地点: ' + ${activity.location}">活动地点</span>
+        </div>
+
+        <!-- 报名信息区域 -->
+        <div class="registration-info">
+            <div class="registration-count">
+                <span th:text="'已报名: ' + ${registrationCount} + ' / ' + ${activity.capacity} + ' 人'">已报名人数</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill"
+                     th:style="'width: ' + ${activity.capacity > 0 ? (registrationCount * 100.0 / activity.capacity) : 0} + '%'">
+                </div>
+            </div>
+            <div class="progress-text">
+                <span th:text="${activity.capacity > 0 ?
+                    (registrationCount * 100.0 / activity.capacity > 100 ? '已满额' :
+                    '报名进度: ' + #numbers.formatDecimal(registrationCount * 100.0 / activity.capacity, 1, 1) + '%') :
+                    '无限制'}">报名进度</span>
+            </div>
         </div>
         <!-- 已登录用户根据报名状态显示按钮 -->
         <div>
