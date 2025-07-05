@@ -153,4 +153,65 @@ public class DebugController {
                "普通用户账号: user / user123 (角色: USER)<br><br>" +
                "现在可以尝试登录了！";
     }
+
+    /**
+     * 测试密码复杂度验证
+     */
+    @GetMapping("/debug/test-password")
+    @ResponseBody
+    public String testPasswordValidation() {
+        String[] testPasswords = {
+            "123456",           // 太短，无字母和特殊符号
+            "abcdefgh",         // 无数字和特殊符号
+            "12345678",         // 无字母和特殊符号
+            "abcd1234",         // 无特殊符号
+            "abcd123!",         // 符合要求
+            "Password1@",       // 符合要求
+            "MyPass123$",       // 符合要求
+            "weak",             // 太短
+            "VeryLongPasswordButNoNumbersOrSpecialChars", // 无数字和特殊符号
+            "Test123@"          // 符合要求
+        };
+
+        StringBuilder result = new StringBuilder();
+        result.append("<h3>密码复杂度测试</h3>");
+        result.append("<p><strong>要求：</strong>至少8位，包含字母、数字和特殊符号（@$!%*?&）</p>");
+        result.append("<table border='1' style='border-collapse: collapse; width: 100%;'>");
+        result.append("<tr><th>测试密码</th><th>结果</th><th>说明</th></tr>");
+
+        for (String password : testPasswords) {
+            String validation = validatePasswordForTest(password);
+            boolean isValid = validation == null;
+            String status = isValid ? "✅ 通过" : "❌ 失败";
+            String explanation = isValid ? "符合所有要求" : validation;
+
+            result.append("<tr>");
+            result.append("<td>").append(password).append("</td>");
+            result.append("<td>").append(status).append("</td>");
+            result.append("<td>").append(explanation).append("</td>");
+            result.append("</tr>");
+        }
+
+        result.append("</table>");
+        return result.toString();
+    }
+
+    /**
+     * 测试用的密码验证方法（复制自RegisterController的逻辑）
+     */
+    private String validatePasswordForTest(String password) {
+        if (password.length() < 8) {
+            return "密码长度至少需要8位";
+        }
+        if (!password.matches(".*[a-zA-Z].*")) {
+            return "密码必须包含至少一个字母";
+        }
+        if (!password.matches(".*\\d.*")) {
+            return "密码必须包含至少一个数字";
+        }
+        if (!password.matches(".*[@$!%*?&].*")) {
+            return "密码必须包含至少一个特殊符号（@$!%*?&）";
+        }
+        return null; // 密码符合要求
+    }
 }

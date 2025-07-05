@@ -2,9 +2,69 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>用户注册</title>
+    <title>用户注册 - 校园活动平台</title>
     <link rel="stylesheet" th:href="@{/static/css/style.css}">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        .password-requirements {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 10px;
+            font-size: 13px;
+        }
+        .requirement {
+            margin: 5px 0;
+            color: #6c757d;
+        }
+        .requirement.valid {
+            color: #28a745;
+        }
+        .requirement.invalid {
+            color: #dc3545;
+        }
+        .requirement::before {
+            content: "○ ";
+            margin-right: 5px;
+        }
+        .requirement.valid::before {
+            content: "✓ ";
+            color: #28a745;
+        }
+        .requirement.invalid::before {
+            content: "✗ ";
+            color: #dc3545;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: bold;
+            color: #444;
+        }
+        .form-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+        }
+        .form-input.valid {
+            border-color: #28a745;
+        }
+        .form-input.invalid {
+            border-color: #dc3545;
+        }
+    </style>
 </head>
 <body>
 
@@ -24,20 +84,40 @@
 <main class="container" style="max-width: 500px; margin: 60px auto; background-color: #fff; padding: 40px 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
     <h2 style="text-align: center; color: #2d3e50; margin-bottom: 30px;">学生用户注册</h2>
 
-    <form th:action="@{/register}" method="post" style="display: flex; flex-direction: column; gap: 20px;">
-        <div>
-            <label for="username" style="display: block; margin-bottom: 6px; font-weight: bold; color: #444;">用户名</label>
-            <input type="text" id="username" name="username" placeholder="请输入用户名" required
-                   style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px;">
+    <form th:action="@{/register}" method="post" id="registerForm">
+        <!-- 用户名输入 -->
+        <div class="form-group">
+            <label for="username" class="form-label">用户名</label>
+            <input type="text" id="username" name="username" class="form-input"
+                   th:value="${username}" placeholder="请输入用户名（至少3个字符）" required>
+            <small style="color: #6c757d;">用户名将用于登录，请选择一个容易记住的名称</small>
         </div>
 
-        <div>
-            <label for="password" style="display: block; margin-bottom: 6px; font-weight: bold; color: #444;">密码</label>
-            <input type="password" id="password" name="password" placeholder="请输入密码" required
-                   style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px;">
+        <!-- 密码输入 -->
+        <div class="form-group">
+            <label for="password" class="form-label">密码</label>
+            <input type="password" id="password" name="password" class="form-input"
+                   placeholder="请输入密码" required>
+
+            <!-- 密码要求提示 -->
+            <div class="password-requirements">
+                <div style="font-weight: bold; margin-bottom: 8px; color: #495057;">密码要求：</div>
+                <div class="requirement" id="req-length">至少8个字符</div>
+                <div class="requirement" id="req-letter">包含至少一个字母</div>
+                <div class="requirement" id="req-number">包含至少一个数字</div>
+                <div class="requirement" id="req-special">包含至少一个特殊符号（@$!%*?&）</div>
+            </div>
         </div>
 
-        <button type="submit" class="btn btn-primary" style="width: 100%;">注册</button>
+        <!-- 确认密码输入 -->
+        <div class="form-group">
+            <label for="confirmPassword" class="form-label">确认密码</label>
+            <input type="password" id="confirmPassword" name="confirmPassword" class="form-input"
+                   placeholder="请再次输入密码" required>
+            <small id="password-match-msg" style="display: none;"></small>
+        </div>
+
+        <button type="submit" id="submitBtn" class="btn btn-primary" style="width: 100%;" disabled>注册</button>
     </form>
 
     <p th:if="${error}" th:text="${error}" style="color: #e53935; text-align: center; margin-top: 15px;"></p>
@@ -54,6 +134,118 @@
         <p>&copy; 2025 校园活动平台. 保留所有权利.</p>
     </div>
 </footer>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const passwordInput = document.getElementById('password');
+    const confirmPasswordInput = document.getElementById('confirmPassword');
+    const submitBtn = document.getElementById('submitBtn');
+    const usernameInput = document.getElementById('username');
+
+    // 密码要求元素
+    const reqLength = document.getElementById('req-length');
+    const reqLetter = document.getElementById('req-letter');
+    const reqNumber = document.getElementById('req-number');
+    const reqSpecial = document.getElementById('req-special');
+    const passwordMatchMsg = document.getElementById('password-match-msg');
+
+    // 验证密码复杂度
+    function validatePassword(password) {
+        const requirements = {
+            length: password.length >= 8,
+            letter: /[a-zA-Z]/.test(password),
+            number: /\d/.test(password),
+            special: /[@$!%*?&]/.test(password)
+        };
+
+        // 更新UI显示
+        updateRequirement(reqLength, requirements.length);
+        updateRequirement(reqLetter, requirements.letter);
+        updateRequirement(reqNumber, requirements.number);
+        updateRequirement(reqSpecial, requirements.special);
+
+        return Object.values(requirements).every(req => req);
+    }
+
+    // 更新要求显示状态
+    function updateRequirement(element, isValid) {
+        element.className = 'requirement ' + (isValid ? 'valid' : 'invalid');
+    }
+
+    // 验证密码匹配
+    function validatePasswordMatch() {
+        const password = passwordInput.value;
+        const confirmPassword = confirmPasswordInput.value;
+
+        if (confirmPassword === '') {
+            passwordMatchMsg.style.display = 'none';
+            return false;
+        }
+
+        const isMatch = password === confirmPassword;
+        passwordMatchMsg.style.display = 'block';
+        passwordMatchMsg.style.color = isMatch ? '#28a745' : '#dc3545';
+        passwordMatchMsg.textContent = isMatch ? '✓ 密码匹配' : '✗ 密码不匹配';
+
+        confirmPasswordInput.className = 'form-input ' + (isMatch ? 'valid' : 'invalid');
+
+        return isMatch;
+    }
+
+    // 检查表单是否可以提交
+    function checkFormValidity() {
+        const username = usernameInput.value.trim();
+        const password = passwordInput.value;
+        const isPasswordValid = validatePassword(password);
+        const isPasswordMatch = validatePasswordMatch();
+        const isUsernameValid = username.length >= 3;
+
+        // 更新用户名输入框样式
+        usernameInput.className = 'form-input ' + (isUsernameValid ? 'valid' : 'invalid');
+
+        // 更新密码输入框样式
+        passwordInput.className = 'form-input ' + (isPasswordValid ? 'valid' : 'invalid');
+
+        // 启用/禁用提交按钮
+        const canSubmit = isUsernameValid && isPasswordValid && isPasswordMatch;
+        submitBtn.disabled = !canSubmit;
+        submitBtn.style.opacity = canSubmit ? '1' : '0.6';
+        submitBtn.style.cursor = canSubmit ? 'pointer' : 'not-allowed';
+    }
+
+    // 事件监听器
+    passwordInput.addEventListener('input', checkFormValidity);
+    confirmPasswordInput.addEventListener('input', checkFormValidity);
+    usernameInput.addEventListener('input', checkFormValidity);
+
+    // 表单提交前的最终验证
+    document.getElementById('registerForm').addEventListener('submit', function(e) {
+        const password = passwordInput.value;
+        const confirmPassword = confirmPasswordInput.value;
+
+        if (!validatePassword(password)) {
+            e.preventDefault();
+            alert('密码不符合复杂度要求！');
+            return false;
+        }
+
+        if (password !== confirmPassword) {
+            e.preventDefault();
+            alert('两次输入的密码不一致！');
+            return false;
+        }
+
+        if (usernameInput.value.trim().length < 3) {
+            e.preventDefault();
+            alert('用户名至少需要3个字符！');
+            return false;
+        }
+    });
+
+    // 初始检查
+    checkFormValidity();
+});
+</script>
 
 </body>
 </html>
