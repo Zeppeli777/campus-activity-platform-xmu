@@ -160,6 +160,7 @@ public class WebController {
         model.addAttribute("activityTypes", activityTypes);
         model.addAttribute("activity", new Activity());
         model.addAttribute("title", "新增活动");
+        model.addAttribute("isEdit", false);//修复了增加活动页面失效的bug
         return "admin/activity-form";
     }
 
@@ -385,6 +386,7 @@ public class WebController {
         model.addAttribute("activities", activities != null ? activities : new ArrayList<>());
         model.addAttribute("registrationCountMap", registrationCountMap != null ? registrationCountMap : new HashMap<>());
         model.addAttribute("title", "活动报名统计");
+
         return "admin/statistics";
     }
 
