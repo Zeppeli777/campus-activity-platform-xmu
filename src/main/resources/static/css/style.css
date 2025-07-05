@@ -300,3 +300,24 @@ footer {
     color: #6c757d;
     margin-bottom: 20px;
 }
+
+/*以下是背景图设置*/
+/* 登录和注册页面的整页背景 */
+body.login-page,
+body.register-page {
+    background-image: url('/static/img/线条小狗wallpaper.JPG');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+}
+
+/* 确保内容容器有适当的对比度 */
+body.login-page .container,
+body.register-page .container {
+    background-color: rgba(0, 0, 0, 0.7);
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+}
+

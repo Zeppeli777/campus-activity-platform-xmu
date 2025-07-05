@@ -6,6 +6,7 @@
     <link rel="stylesheet" th:href="@{/static/css/style.css}">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet">
     <style>
+        /*直接在页面主体修改css样式，不交叉影响其他页面*/
         .password-requirements {
             background: #f8f9fa;
             border: 1px solid #e9ecef;
@@ -66,7 +67,7 @@
         }
     </style>
 </head>
-<body>
+<body class="register-page">
 
 <!-- 统一页眉 -->
 <header id="header">

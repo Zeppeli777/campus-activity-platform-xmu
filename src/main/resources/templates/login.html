@@ -4,8 +4,33 @@
     <meta charset="UTF-8">
     <title>用户登录 - 校园活动平台</title>
     <link rel="stylesheet" th:href="@{/static/css/style.css}">
+    <style>
+        /* 表单样式 */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: bold;
+            color: #444;
+        }
+        .form-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+        }
+    </style>
 </head>
-<body>
+<body class="login-page">
     <header id="header">
         <div class="container">
             <h1><a href="/">校园活动平台</a></h1>
@@ -18,31 +43,33 @@
         </div>
     </header>
 
-    <main id="content">
-        <div class="container">
+    <main class="container" style="max-width: 500px; margin: 60px auto; background-color: #fff; padding: 40px 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+        <!-- 登录表单内容 -->
             <div class="login-container">
-                <h2>用户登录</h2>
+                <h2 style="text-align: center; color: #2d3e50; margin-bottom: 30px;">用户登陆</h2>
 
-                <div class="login-form">
-                    <form th:action="@{/login}" method="post">
-                        <div class="form-group">
-                            <label for="username">用户名:</label>
-                            <input type="text" id="username" name="username" required />
+                 <div class="login-form" style="display: flex; flex-direction: column; align-items: center; width: 100%;">
+                    <form th:action="@{/login}" method="post" style="width: 100%; max-width: 300px;">
+                         <div class="form-group">
+                            <label for="username" class="form-label">用户名:</label>
+                            <input type="text" id="username" name="username" class="form-input" 
+                                   placeholder="请输入用户名" required />
                         </div>
                         <div class="form-group">
-                            <label for="password">密码:</label>
-                            <input type="password" id="password" name="password" required />
+                            <label for="password" class="form-label"> 密码 :</label>
+                            <input type="password" id="password" name="password" class="form-input" 
+                                   placeholder="请输入密码" required />
                         </div>
-                        <button type="submit" class="btn btn-primary">登录</button>
+                        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">登录</button>
                     </form>
 
-                    <div class="login-messages">
+                    <div class="login-messages" style="width: 100%; max-width: 300px; text-align: center; margin-top: 15px;">
                         <p class="error-message" th:if="${param.error}" style="color: #e53935;">用户名或密码错误</p>
                         <p class="success-message" th:if="${param.logout}">您已退出登录</p>
                     </div>
 
-                    <div class="login-help">
-                        <p><a th:href="@{/register}">还没有账户？点击注册</a></p>
+                    <div class="login-help" style="width: 100%; max-width: 300px; margin-top: 15px;">
+                        <p style="text-align: center;">还没有账户？<a th:href="@{/register}" style="color: #27ae60; text-decoration: underline;">点击注册</a></p>
                         <div class="demo-accounts">
                             <h4>测试账户：</h4>
                             <p><strong>管理员账户：</strong> admin / admin123</p>
@@ -51,7 +78,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        <!-- 登录表单内容到此结束 -->
     </main>
 
     <footer id="footer">
