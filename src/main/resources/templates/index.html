@@ -5,6 +5,40 @@
     <title>校园活动平台 - 首页</title>
     <link rel="stylesheet" th:href="@{/static/css/style.css}">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* 用户信息样式 */
+        /*直接在这里修改了css样式，防止影响其他页面的状况*/
+        .user-info {
+            color: #2c3e50;
+            font-weight: bold;
+        }
+        .admin-badge {
+            background: #e74c3c;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.8em;
+            margin-left: 5px;
+        }
+        .logout-link {
+            color: #e74c3c !important;
+            font-weight: bold;
+        }
+        .logout-link:hover {
+            color: #c0392b !important;
+        }
+        .register-link {
+            color: #27ae60 !important;
+        }
+        .admin-note {
+            color: #7f8c8d;
+            font-style: italic;
+        }
+        /* 导航栏间距调整 */
+        nav ul li {
+            margin: 0 10px;
+        }
+    </style>
 </head>
 
 <!--修改了HTML的Index布局 用AI优化的 后续需要优化其他界面也一样可以用AI-->
@@ -16,19 +50,43 @@
         <nav>
             <ul>
                 <li><a href="/user/activities/page">用户活动</a></li>
-                <li><a href="/admin/activities/page">活动管理</a></li>
-                <li><a href="/user/my-registrations">我的报名</a></li>
-                <li><a href="/login" class="login-link">登录</a></li>
+                <!-- 根据登录状态显示不同的导航项 -->
+                <li th:if="${isLoggedIn and isAdmin}"><a href="/admin/activities/page">活动管理</a></li>
+                <li th:if="${isLoggedIn}"><a href="/user/my-registrations">我的报名</a></li>
+
+                <!-- 未登录状态显示登录链接 -->
+                <li th:if="${!isLoggedIn}"><a href="/login" class="login-link">登录</a></li>
+                <li th:if="${!isLoggedIn}"><a href="/register" class="register-link">注册</a></li>
+
+                <!-- 已登录状态显示用户信息和退出链接 -->
+                <li th:if="${isLoggedIn}" class="user-info">
+                    <span th:text="'欢迎, ' + ${username}">欢迎, 用户</span>
+                    <span th:if="${isAdmin}" class="admin-badge">【管理员】</span>
+                </li>
+                <li th:if="${isLoggedIn}">
+                    <a href="/logout" class="logout-link" onclick="return confirm('确定要退出登录吗？')">退出登录</a>
+                </li>
             </ul>
         </nav>
     </div>
 </header>
 
 <main id="content">
+    <!-- 退出登录成功提示 -->
+    <div th:if="${logoutSuccess}" class="alert alert-success" style="background: #d4edda; color: #155724; padding: 15px; margin: 20px auto; max-width: 600px; border-radius: 5px; text-align: center;">
+        ✅ 您已成功退出登录！
+    </div>
+
     <section class="hero-section">
         <div class="container">
-            <h2>欢迎来到校园活动平台</h2>
-            <p>发现精彩活动，参与丰富多彩的校园生活</p>
+            <!-- 根据登录状态显示不同的欢迎信息 -->
+            <h2 th:if="${!isLoggedIn}">欢迎来到校园活动平台</h2>
+            <h2 th:if="${isLoggedIn and !isAdmin}" th:text="'欢迎回来, ' + ${username} + '!'">欢迎回来, 用户!</h2>
+            <h2 th:if="${isLoggedIn and isAdmin}" th:text="'管理员 ' + ${username} + ', 欢迎回来!'">管理员, 欢迎回来!</h2>
+
+            <p th:if="${!isLoggedIn}">发现精彩活动，参与丰富多彩的校园生活</p>
+            <p th:if="${isLoggedIn and !isAdmin}">继续探索精彩活动，享受校园生活</p>
+            <p th:if="${isLoggedIn and isAdmin}">管理活动，为同学们创造更好的校园体验</p>
         </div>
     </section>
 
@@ -39,17 +97,38 @@
             <a href="/user/activities/page" class="btn btn-primary">查看活动</a>
         </div>
 
-        <div class="action-card">
+        <!-- 未登录用户显示登录注册卡片 -->
+        <div class="action-card" th:if="${!isLoggedIn}">
+            <h3>用户登录</h3>
+            <p>登录后可以报名参加活动</p>
+            <a href="/login" class="btn btn-primary">立即登录</a>
+        </div>
+
+        <div class="action-card" th:if="${!isLoggedIn}">
+            <h3>新用户注册</h3>
+            <p>注册账号，开始您的校园活动之旅</p>
+            <a href="/register" class="btn btn-secondary">立即注册</a>
+        </div>
+
+        <!-- 已登录普通用户显示报名管理 -->
+        <div class="action-card" th:if="${isLoggedIn and !isAdmin}">
             <h3>我的报名</h3>
             <p>管理您已报名的活动</p>
             <a href="/user/my-registrations" class="btn btn-secondary">我的报名</a>
         </div>
 
-        <div class="action-card">
+        <!-- 管理员用户显示活动管理 -->
+        <div class="action-card" th:if="${isLoggedIn and isAdmin}">
+            <h3>活动管理</h3>
+            <p>创建和管理校园活动</p>
+            <a href="/admin/activities/page" class="btn btn-admin">管理活动</a>
+        </div>
+
+        <!-- 未登录用户显示需要权限的提示 -->
+        <div class="action-card" th:if="${!isLoggedIn}">
             <h3>活动管理</h3>
             <p>管理员功能：创建和管理活动</p>
             <div class="admin-access">
-                <a href="/admin/activities/page" class="btn btn-admin">管理活动</a>
                 <small class="admin-note">需要管理员权限，<a href="/login">点击登录</a></small>
             </div>
         </div>

@@ -42,13 +42,35 @@ public class WebController {
 
     /**
      * 首页 - 显示欢迎页面和快速导航
-     * 可以在这里添加数据，传递给前端模板
+     * 根据用户登录状态显示不同的导航栏
      */
     @GetMapping("/")
-    public String index(Model model) {
-        // 可以添加一些数据传递给前端
+    public String index(Model model, Authentication authentication,
+                       @RequestParam(value = "logout", required = false) String logout) {
+        // 添加基本数据
         model.addAttribute("welcomeMessage", "欢迎来到厦门大学校园活动平台");
         model.addAttribute("totalActivities", activityService.getAllActivities().size());
+
+        // 检查是否是退出登录后的跳转
+        if ("true".equals(logout)) {
+            model.addAttribute("logoutSuccess", true);
+        }
+
+        // 检查用户登录状态
+        if (authentication != null && authentication.isAuthenticated() &&
+            !authentication.getName().equals("anonymousUser")) {
+            // 用户已登录
+            model.addAttribute("isLoggedIn", true);
+            model.addAttribute("username", authentication.getName());
+
+            // 检查用户角色
+            boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+            model.addAttribute("isAdmin", isAdmin);
+        } else {
+            // 用户未登录
+            model.addAttribute("isLoggedIn", false);
+        }
 
         return "index"; // 返回 templates/index.html 模板
     }

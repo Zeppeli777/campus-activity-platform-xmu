@@ -98,7 +98,7 @@ public class SecurityConfig {
 //                .and()
             // 配置登出
             .logout()
-                .logoutSuccessUrl("/login?logout") // 登出后跳转到登录页面
+                .logoutSuccessUrl("/?logout=true") // 登出后跳转到首页，显示退出成功信息
                 .permitAll()                       // 登出功能允许所有人使用
                 .and()
             // 禁用CSRF保护（简化开发，生产环境建议启用）
