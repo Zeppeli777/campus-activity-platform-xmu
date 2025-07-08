@@ -282,7 +282,8 @@
                         ['link'],
                         ['clean']
                     ]
-                }
+                },
+                formats: ['header', 'bold', 'italic', 'underline', 'strike', 'color', 'background', 'list', 'bullet', 'align', 'link']
             });
 
             // 如果是编辑模式，加载现有内容
@@ -313,16 +314,37 @@
         document.getElementById('activityForm').addEventListener('submit', function(e) {
             // 在提交前确保富文本内容已同步
             if (quill) {
-                const content = quill.root.innerHTML;
-                document.getElementById('description').value = content;
+                let content = quill.root.innerHTML;
 
-                // 验证富文本内容不为空（去除HTML标签后检查）
+                // 清理和验证内容
                 const textContent = quill.getText().trim();
                 if (!textContent) {
                     alert('请填写活动描述！');
                     e.preventDefault();
                     return false;
                 }
+
+                // 检查内容长度（限制为15000字符以支持富文本样式）
+                if (content.length > 15000) {
+                    alert('活动描述内容过长，请适当缩减内容！');
+                    e.preventDefault();
+                    return false;
+                }
+
+                // 清理可能导致问题的HTML属性，但保留颜色和背景色样式
+                content = content.replace(/class="[^"]*"/g, ''); // 移除class属性
+                // 只保留安全的样式属性（颜色、背景色、文本对齐）
+                content = content.replace(/style="([^"]*)"/g, function(match, styles) {
+                    const safeStyles = styles.split(';').filter(style => {
+                        const trimmed = style.trim();
+                        return trimmed.startsWith('color:') ||
+                               trimmed.startsWith('background-color:') ||
+                               trimmed.startsWith('text-align:');
+                    }).join('; ');
+                    return safeStyles ? `style="${safeStyles}"` : '';
+                });
+
+                document.getElementById('description').value = content;
             }
             const startTime = new Date(document.getElementById('startTime').value);
             const endTime = new Date(document.getElementById('endTime').value);
