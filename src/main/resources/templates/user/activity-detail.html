@@ -155,7 +155,7 @@
     </div>
 
     <div class="activity-content">
-        <p th:text="${activity.description}">活动描述</p>
+        <div th:utext="${activity.description}">活动描述</div>
 
         <div class="activity-meta">
             <span th:text="'开始时间: ' + ${#dates.format(activity.startTime, 'yyyy-MM-dd HH:mm')}">开始时间</span>

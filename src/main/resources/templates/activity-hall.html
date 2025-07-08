@@ -20,7 +20,7 @@
         <div th:if="${activities != null and !activities.empty}">
             <div th:each="activity : ${activities}" class="activity-card">
                 <h3 th:text="${activity.title}">活动标题</h3>
-                <p th:text="${activity.description}">活动描述</p>
+                <div th:utext="${activity.description}">活动描述</div>
                 <p>开始时间: <span th:text="${activity.startTime}">开始时间</span></p>
                 <p>结束时间: <span th:text="${activity.endTime}">结束时间</span></p>
                 <p>容量: <span th:text="${activity.capacity}">容量</span></p>

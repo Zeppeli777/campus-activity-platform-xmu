@@ -115,7 +115,7 @@
                     <div class="activity-description">
                         <h3>活动描述</h3>
                         <div class="description-content">
-                            <p th:if="${activity.description}" th:text="${activity.description}">活动描述内容</p>
+                            <div th:if="${activity.description}" th:utext="${activity.description}">活动描述内容</div>
                             <p th:unless="${activity.description}" class="text-muted">暂无活动描述</p>
                         </div>
                     </div>

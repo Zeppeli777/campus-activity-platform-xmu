@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="${title}">新增活动</title>
     <link rel="stylesheet" th:href="@{/static/css/style.css}">
+    <!-- Quill.js 富文本编辑器 -->
+    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
     <style>
         .form-container {
             max-width: 800px;
@@ -137,6 +140,34 @@
             color: #6c757d;
             margin-top: 5px;
         }
+
+        /* 富文本编辑器样式 */
+        #description-editor {
+            border: 2px solid #e1e5e9;
+            border-radius: 6px;
+            background: #fff;
+        }
+
+        #description-editor:focus-within {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+
+        .ql-toolbar {
+            border-top: none;
+            border-left: none;
+            border-right: none;
+            border-bottom: 1px solid #e1e5e9;
+            border-radius: 6px 6px 0 0;
+        }
+
+        .ql-container {
+            border-bottom: none;
+            border-left: none;
+            border-right: none;
+            border-radius: 0 0 6px 6px;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
@@ -175,10 +206,11 @@
 
             <div class="form-group">
                 <label for="description">活动描述 <span class="required">*</span></label>
-                <textarea id="description" name="description" required
-                          placeholder="请详细描述活动内容、目的、注意事项等"
-                          maxlength="1000" th:text="${activity?.description}"></textarea>
-                <div class="form-help">活动描述不能超过1000个字符</div>
+                <!-- 富文本编辑器容器 -->
+                <div id="description-editor" style="height: 200px;"></div>
+                <!-- 隐藏字段存储富文本内容 -->
+                <input type="hidden" id="description" name="description" required>
+                <div class="form-help">请详细描述活动内容、目的、注意事项等</div>
             </div>
 
             <div class="form-row">
@@ -233,8 +265,65 @@
     <footer th:replace="layout/footer :: footer"></footer>
 
     <script>
+        // 初始化富文本编辑器
+        let quill;
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化 Quill 编辑器
+            quill = new Quill('#description-editor', {
+                theme: 'snow',
+                placeholder: '请详细描述活动内容、目的、注意事项等...',
+                modules: {
+                    toolbar: [
+                        [{ 'header': [1, 2, 3, false] }],
+                        ['bold', 'italic', 'underline', 'strike'],
+                        [{ 'color': [] }, { 'background': [] }],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                        [{ 'align': [] }],
+                        ['link'],
+                        ['clean']
+                    ]
+                }
+            });
+
+            // 如果是编辑模式，加载现有内容
+            const isEdit = /*[[${isEdit}]]*/ false;
+            const existingDescription = /*[[${activity?.description}]]*/ '';
+
+            if (isEdit && existingDescription) {
+                // 如果现有内容包含HTML标签，直接设置；否则作为纯文本处理
+                if (existingDescription.includes('<') && existingDescription.includes('>')) {
+                    quill.root.innerHTML = existingDescription;
+                } else {
+                    quill.setText(existingDescription);
+                }
+            }
+
+            // 监听内容变化，同步到隐藏字段
+            quill.on('text-change', function() {
+                const content = quill.root.innerHTML;
+                document.getElementById('description').value = content;
+            });
+
+            // 初始化时也要同步一次内容
+            const initialContent = quill.root.innerHTML;
+            document.getElementById('description').value = initialContent;
+        });
+
         // 表单验证
         document.getElementById('activityForm').addEventListener('submit', function(e) {
+            // 在提交前确保富文本内容已同步
+            if (quill) {
+                const content = quill.root.innerHTML;
+                document.getElementById('description').value = content;
+
+                // 验证富文本内容不为空（去除HTML标签后检查）
+                const textContent = quill.getText().trim();
+                if (!textContent) {
+                    alert('请填写活动描述！');
+                    e.preventDefault();
+                    return false;
+                }
+            }
             const startTime = new Date(document.getElementById('startTime').value);
             const endTime = new Date(document.getElementById('endTime').value);
             const now = new Date();
