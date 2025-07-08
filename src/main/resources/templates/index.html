@@ -13,7 +13,7 @@
             font-weight: bold;
         }
         .admin-badge {
-            background: #e74c3c;
+            background: #27ae60;
             color: white;
             padding: 2px 6px;
             border-radius: 3px;
@@ -91,45 +91,45 @@
     </section>
 
     <section class="quick-actions container">
-        <div class="action-card">
+        <div class="action-card" style="background-color: rgba(256, 256, 256, 0.9);">
             <h3>浏览活动</h3>
             <p>查看所有可参与的校园活动</p>
             <a href="/user/activities/page" class="btn btn-primary">查看活动</a>
         </div>
 
         <!-- 未登录用户显示登录注册卡片 -->
-        <div class="action-card" th:if="${!isLoggedIn}">
+        <div class="action-card" th:if="${!isLoggedIn}" style="background-color: rgba(256, 256, 256, 0.9);">
             <h3>用户登录</h3>
             <p>登录后可以报名参加活动</p>
             <a href="/login" class="btn btn-primary">立即登录</a>
         </div>
 
-        <div class="action-card" th:if="${!isLoggedIn}">
+        <div class="action-card" th:if="${!isLoggedIn}" style="background-color: rgba(256, 256, 256, 0.9);">
             <h3>新用户注册</h3>
             <p>注册账号，开始您的校园活动之旅</p>
             <a href="/register" class="btn btn-secondary">立即注册</a>
         </div>
 
         <!-- 已登录普通用户显示报名管理 -->
-        <div class="action-card" th:if="${isLoggedIn and !isAdmin}">
+        <div class="action-card" th:if="${isLoggedIn and !isAdmin}" style="background-color: rgba(256, 256, 256, 0.9);">
             <h3>我的报名</h3>
             <p>管理您已报名的活动</p>
             <a href="/user/my-registrations" class="btn btn-secondary">我的报名</a>
         </div>
 
         <!-- 管理员用户显示活动管理 -->
-        <div class="action-card" th:if="${isLoggedIn and isAdmin}">
+        <div class="action-card" th:if="${isLoggedIn and isAdmin}" style="background-color: rgba(256, 256, 256, 0.9);">
             <h3>活动管理</h3>
             <p>创建和管理校园活动</p>
             <a href="/admin/activities/page" class="btn btn-admin">管理活动</a>
         </div>
 
         <!-- 未登录用户显示需要权限的提示 -->
-        <div class="action-card" th:if="${!isLoggedIn}">
+        <div class="action-card" th:if="${!isLoggedIn}" style="background-color: rgba(256, 256, 256, 0.9);">
             <h3>活动管理</h3>
             <p>管理员功能：创建和管理活动</p>
             <div class="admin-access">
-                <small class="admin-note">需要管理员权限，<a href="/login">点击登录</a></small>
+                <small class="admin-note">需要管理员权限，<a href="/login" style="color: #27ae60; text-decoration: underline; font-weight: bold; transition: all 0.3s ease;" onmouseover="this.style.color='#219653'; this.style.textDecoration='none'; this.style.transform='translateY(-1px)'" onmouseout="this.style.color='#27ae60'; this.style.textDecoration='underline'; this.style.transform='translateY(0)'">点击登录</a></small>
             </div>
         </div>
     </section>

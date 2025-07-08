@@ -20,10 +20,44 @@
         .status-registered { background-color: #007bff; color: white; }
         .btn:disabled { opacity: 0.6; cursor: not-allowed; }
         .registration-info { font-size: 14px; color: #666; margin-top: 5px; }
+
+        /* 登录提示按钮样式 */
+        .btn-login-hint {
+            background-color: #28a745 !important;
+            border-color: #28a745 !important;
+            transition: all 0.3s ease;
+        }
+
+        .btn-login-hint:hover {
+            background-color: #218838 !important;
+            border-color: #1e7e34 !important;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(40,167,69,0.3);
+        }
+
+        /* 报名按钮样式 */
+        .register-btn {
+            transition: all 0.3s ease;
+        }
+
+        .register-btn:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(40,167,69,0.3);
+        }
+
+        /* 用户状态提示样式 */
+        .user-status-info {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #007bff;
+        }
     </style>
 </head>
 <body>
     <header id="header">
+        <div class="container">
         <h1>校园活动平台</h1>
         <nav>
             <ul>
@@ -33,23 +67,27 @@
                 <li><a href="/user/my-registrations">我的报名</a></li>
             </ul>
         </nav>
+        </div>
     </header>
 
-    <main id="content">
+    <div class="container">
+        <main class="container" style="max-width: 1000px; margin: 60px auto; background-color: rgba(256, 256, 256, 0.8); padding: 40px 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
         <h1>用户活动列表</h1>
 
-        <!-- 用户选择区域（去掉该功能） -->
-<!--        <div class="user-selection" style="margin-bottom: 20px;">-->
-<!--            <label for="userSelect">选择用户查看状态：</label>-->
-<!--            <select id="userSelect" onchange="changeUser()">-->
-<!--                <option value="">请选择用户</option>-->
-<!--                <option value="1" th:selected="${currentUserId == 1}">管理员</option>-->
-<!--                <option value="2" th:selected="${currentUserId == 2}">张三</option>-->
-<!--                <option value="3" th:selected="${currentUserId == 3}">李四</option>-->
-<!--                <option value="4" th:selected="${currentUserId == 4}">王五</option>-->
-<!--                <option value="5" th:selected="${currentUserId == 5}">赵老师</option>-->
-<!--            </select>-->
-<!--        </div>-->
+        <!-- 用户状态显示 -->
+        <div class="user-status-info">
+            <div th:if="${isLoggedIn}" style="color: #28a745;">
+                <strong>✅ 已登录</strong> - 当前用户：<span th:text="${currentUsername}">用户名</span>
+                <small style="color: #666; margin-left: 10px;">您可以直接报名参加感兴趣的活动</small>
+            </div>
+            <div th:if="${!isLoggedIn}" style="color: #dc3545;">
+                <strong>⚠️ 未登录</strong> -
+                <a href="/login" style="color: #007bff; text-decoration: none;">点击登录</a> 后可报名参加活动
+                <small style="color: #666; margin-left: 10px;">登录后可查看个人报名状态</small>
+            </div>
+        </div>
+
+
 
         <div class="activity-list">
             <div th:if="${activities != null and !activities.isEmpty()}">
@@ -76,15 +114,25 @@
                     </div>
                     <div class="activity-actions">
                         <a th:href="@{/user/activities/page/{id}(id=${activity.id})}" class="btn btn-primary">查看详情</a>
-                        <button th:if="${canRegister != null and canRegister.get(activity.id)}"
-                                class="btn btn-success register-btn"
-                                th:data-activity-id="${activity.id}"
-                                th:data-user-id="${currentUserId}">立即报名</button>
-                        <button th:if="${canRegister == null or !canRegister.get(activity.id)}"
-                                class="btn btn-secondary"
-                                disabled>
-                            <span th:if="${activityStatuses != null}" th:text="${activityStatuses.get(activity.id)}">无法报名</span>
-                        </button>
+
+                        <!-- 未登录用户显示登录提示 -->
+                        <a th:if="${!isLoggedIn}" href="/login" class="btn btn-success btn-login-hint">🔐 登录后报名</a>
+
+                        <!-- 已登录用户根据状态显示不同按钮 -->
+                        <div th:if="${isLoggedIn}" style="display: inline-block;">
+                            <!-- 可以报名 -->
+                            <button th:if="${canRegister != null and canRegister.get(activity.id)}"
+                                    class="btn btn-success register-btn"
+                                    th:data-activity-id="${activity.id}"
+                                    th:data-user-id="${currentUserId}">立即报名</button>
+
+                            <!-- 不能报名（已报名、已满额、已结束等） -->
+                            <button th:if="${canRegister == null or !canRegister.get(activity.id)}"
+                                    class="btn btn-secondary"
+                                    disabled>
+                                <span th:if="${activityStatuses != null}" th:text="${activityStatuses.get(activity.id)}">无法报名</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -95,22 +143,13 @@
             </div>
         </div>
     </main>
+        </div>
 
     <footer id="footer">
         <p>&copy; 2025 校园活动平台. 保留所有权利.</p>
     </footer>
 
     <script>
-        function changeUser() {
-            const userId = document.getElementById('userSelect').value;
-            const currentUrl = new URL(window.location);
-            if (userId) {
-                currentUrl.searchParams.set('userId', userId);
-            } else {
-                currentUrl.searchParams.delete('userId');
-            }
-            window.location.href = currentUrl.toString();
-        }
 
         // 报名功能
         $(document).ready(function() {
@@ -118,29 +157,52 @@
                 const activityId = $(this).data('activity-id');
                 const userId = $(this).data('user-id');
                 const button = $(this);
+                const activityTitle = $(this).closest('.activity-card').find('h3').text().split('\n')[0].trim();
 
+                // 检查用户ID是否存在
                 if (!userId) {
-                    alert('请先选择用户');
+                    alert('用户信息获取失败，请刷新页面后重试');
                     return;
                 }
 
+                // 确认对话框
+                if (!confirm('确定要报名参加以下活动吗？\n\n' + activityTitle)) {
+                    return;
+                }
+
+                // 禁用按钮并显示加载状态
                 button.prop('disabled', true).text('报名中...');
 
+                // 发送报名请求
                 $.post('/user/activities/register', {
                     activityId: activityId,
                     userId: userId
                 })
                 .done(function(response) {
                     if (response.success) {
-                        alert('报名成功！');
+                        alert('🎉 报名成功！\n\n您已成功报名参加：' + activityTitle + '\n\n请按时参加活动。');
                         location.reload(); // 刷新页面更新状态
                     } else {
-                        alert('报名失败：' + response.message);
+                        alert('❌ 报名失败\n\n' + (response.message || '未知错误'));
                         button.prop('disabled', false).text('立即报名');
                     }
                 })
-                .fail(function() {
-                    alert('报名失败，请稍后重试');
+                .fail(function(xhr, status, error) {
+                    console.error('报名请求失败:', xhr, status, error);
+                    let errorMessage = '网络错误，请稍后重试';
+
+                    if (xhr.status === 401) {
+                        errorMessage = '登录已过期，请重新登录';
+                        setTimeout(() => {
+                            window.location.href = '/login';
+                        }, 2000);
+                    } else if (xhr.status === 403) {
+                        errorMessage = '没有权限执行此操作';
+                    } else if (xhr.status === 404) {
+                        errorMessage = '活动不存在或已被删除';
+                    }
+
+                    alert('❌ 报名失败\n\n' + errorMessage);
                     button.prop('disabled', false).text('立即报名');
                 });
             });

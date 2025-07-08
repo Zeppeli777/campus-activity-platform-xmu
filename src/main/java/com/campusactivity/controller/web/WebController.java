@@ -77,10 +77,27 @@ public class WebController {
     
     /**
      * 用户活动页面
+     * 自动获取当前登录用户信息，不再依赖URL参数
      */
     @GetMapping("/user/activities/page")
-    public String userActivities(Model model, @RequestParam(required = false) Long userId) {
+    public String userActivities(Model model, Authentication authentication) {
         List<Activity> activities = activityService.getAllActivities();
+
+        // 检查用户登录状态
+        boolean isLoggedIn = authentication != null && authentication.isAuthenticated() &&
+                           !authentication.getName().equals("anonymousUser");
+
+        Long currentUserId = null;
+        String currentUsername = null;
+
+        if (isLoggedIn) {
+            // 获取当前登录用户信息
+            currentUsername = authentication.getName();
+            User currentUser = userRepository.findByUsername(currentUsername);
+            if (currentUser != null) {
+                currentUserId = currentUser.getId();
+            }
+        }
 
         // 为每个活动添加状态信息
         Map<Long, String> activityStatuses = new HashMap<>();
@@ -88,9 +105,9 @@ public class WebController {
         Map<Long, Boolean> canRegister = new HashMap<>();
 
         for (Activity activity : activities) {
-            String status = activityService.getActivityStatus(activity.getId(), userId);
+            String status = activityService.getActivityStatus(activity.getId(), currentUserId);
             Long count = activityService.getRegistrationCount(activity.getId());
-            boolean canReg = activityService.canUserRegister(activity.getId(), userId);
+            boolean canReg = activityService.canUserRegister(activity.getId(), currentUserId);
 
             activityStatuses.put(activity.getId(), status);
             registrationCounts.put(activity.getId(), count);
@@ -101,7 +118,9 @@ public class WebController {
         model.addAttribute("activityStatuses", activityStatuses);
         model.addAttribute("registrationCounts", registrationCounts);
         model.addAttribute("canRegister", canRegister);
-        model.addAttribute("currentUserId", userId);
+        model.addAttribute("currentUserId", currentUserId);
+        model.addAttribute("currentUsername", currentUsername);
+        model.addAttribute("isLoggedIn", isLoggedIn);
         model.addAttribute("title", "用户活动列表");
         return "user/activity-list";
     }
@@ -110,7 +129,7 @@ public class WebController {
      * 用户活动详情页面
      */
     @GetMapping("/user/activities/page/{id}")
-    public String userActivityDetail(@PathVariable Long id, Model model) {
+    public String userActivityDetail(@PathVariable Long id, Model model, Authentication authentication) {
         Activity activity = activityService.getActivityById(id);
         if (activity == null) {
             model.addAttribute("errorMessage", "活动不存在！");
@@ -120,8 +139,49 @@ public class WebController {
         // 获取报名人数
         Long registrationCount = activityService.getRegistrationCount(id);
 
+        // 检查用户登录状态
+        boolean isLoggedIn = authentication != null && authentication.isAuthenticated() &&
+                           !authentication.getName().equals("anonymousUser");
+
+        Long currentUserId = null;
+        boolean isUserRegistered = false;
+        boolean canRegister = false;
+        String activityStatus = "未知";
+
+        if (isLoggedIn) {
+            // 获取当前用户信息
+            String username = authentication.getName();
+            User currentUser = userRepository.findByUsername(username);
+            if (currentUser != null) {
+                currentUserId = currentUser.getId();
+
+                // 检查用户是否已报名
+                isUserRegistered = registrationService.isUserRegistered(currentUserId, id);
+
+                // 检查是否可以报名
+                canRegister = activityService.canUserRegister(id, currentUserId);
+
+                // 获取活动状态
+                activityStatus = activityService.getActivityStatus(id, currentUserId);
+            }
+        }
+
+        // 检查活动是否已结束
+        Date now = new Date();
+        boolean isActivityEnded = activity.getEndTime() != null && activity.getEndTime().before(now);
+
+        // 检查活动是否已满额
+        boolean isActivityFull = activity.getCapacity() != null && registrationCount >= activity.getCapacity();
+
         model.addAttribute("activity", activity);
         model.addAttribute("registrationCount", registrationCount);
+        model.addAttribute("isLoggedIn", isLoggedIn);
+        model.addAttribute("currentUserId", currentUserId);
+        model.addAttribute("isUserRegistered", isUserRegistered);
+        model.addAttribute("canRegister", canRegister);
+        model.addAttribute("activityStatus", activityStatus);
+        model.addAttribute("isActivityEnded", isActivityEnded);
+        model.addAttribute("isActivityFull", isActivityFull);
         model.addAttribute("title", "活动详情 - " + activity.getTitle());
         return "user/activity-detail";
     }
@@ -289,7 +349,42 @@ public class WebController {
     }
     
     /**
-     * 报名活动
+     * 报名活动 - GET方式处理（从活动详情页面跳转）
+     */
+    @GetMapping("/user/registrations/enroll")
+    public String enrollActivity(@RequestParam Long activityId,
+                                Authentication authentication,
+                                RedirectAttributes redirectAttributes) {
+        try {
+            // 检查用户是否登录
+            if (authentication == null || !authentication.isAuthenticated() ||
+                authentication.getName().equals("anonymousUser")) {
+                redirectAttributes.addFlashAttribute("error", "请先登录后再报名！");
+                return "redirect:/login";
+            }
+
+            // 获取当前用户
+            String username = authentication.getName();
+            User currentUser = userRepository.findByUsername(username);
+            if (currentUser == null) {
+                redirectAttributes.addFlashAttribute("error", "用户信息不存在！");
+                return "redirect:/login";
+            }
+
+            // 执行报名
+            Registration registration = registrationService.registerUserForActivity(currentUser.getId(), activityId);
+            redirectAttributes.addFlashAttribute("success", "报名成功！");
+
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
+
+        // 重定向回活动详情页面
+        return "redirect:/user/activities/page/" + activityId;
+    }
+
+    /**
+     * 报名活动 - POST方式处理（AJAX调用）
      */
     @PostMapping("/user/activities/register")
     @ResponseBody

@@ -1,10 +1,22 @@
+/*旧版
 body {
     margin: 0;
     font-family: 'Noto Sans SC', sans-serif;
     background-color: #f9f9fb;
     color: #333;
 }
+*/
 
+body {
+    margin: 0;
+    font-family: 'Noto Sans SC', sans-serif;
+    background-image: url('/static/img/线条小狗wallpaper.JPG');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+    color: #333;
+}
 /*修改了css样式 优化了一下界面*/
 /*后续需要优化其他页面可以把这个css抛给AI 让他参考修改美化你的页面
 我们自己写只需要修改基本功能即可*/

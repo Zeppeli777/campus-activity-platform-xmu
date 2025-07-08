@@ -140,9 +140,21 @@
     </style>
 </head>
 <body>
-    <header th:replace="layout/header :: header"></header>
+<header id="header">
+    <div class="container">
+        <h1>校园活动平台</h1>
+        <nav>
+            <ul>
+                <li><a href="/">首页</a></li>
+                <li><a href="/user/activities/page" class="active">用户活动</a></li>
+                <li><a href="/admin/activities/page">活动管理</a></li>
+                <li><a href="/user/my-registrations">我的报名</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
 
-    <div class="form-container">
+    <div class="form-container" style="background-color: rgba(256,256,256,0.7);">
         <h1 class="form-title" th:text="${title}">新增活动</h1>
 
         <!-- 显示成功消息 -->

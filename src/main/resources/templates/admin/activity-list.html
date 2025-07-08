@@ -36,7 +36,7 @@
             <!-- 显示错误消息 -->
             <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>
 
-            <div class="activity-list">
+            <div class="activity-list" style="max-width: 1400px; background-color: rgba(256, 256, 256, 0);">
                 <div th:if="${activities != null and !activities.isEmpty()}">
                     <div class="activity-table-container">
                         <table class="activity-table">

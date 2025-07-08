@@ -82,7 +82,7 @@
 </header>
 
 <!-- 注册表单内容 -->
-<main class="container" style="max-width: 500px; margin: 60px auto; background-color: #fff; padding: 40px 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+<main class="container" style="max-width: 500px; margin: 60px auto; background-color: rgba(256, 256, 256, 0.7); padding: 40px 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
     <h2 style="text-align: center; color: #2d3e50; margin-bottom: 30px;">学生用户注册</h2>
 
     <form th:action="@{/register}" method="post" id="registerForm">
@@ -118,7 +118,7 @@
             <small id="password-match-msg" style="display: none;"></small>
         </div>
 
-        <button type="submit" id="submitBtn" class="btn btn-primary" style="width: 100%;" disabled>注册</button>
+        <button type="submit" id="submitBtn" class="btn btn-primary" style="width: 100%; opacity: 1 !important;" disabled>注册</button>
     </form>
 
     <p th:if="${error}" th:text="${error}" style="color: #e53935; text-align: center; margin-top: 15px;"></p>
@@ -210,7 +210,6 @@ document.addEventListener('DOMContentLoaded', function() {
         // 启用/禁用提交按钮
         const canSubmit = isUsernameValid && isPasswordValid && isPasswordMatch;
         submitBtn.disabled = !canSubmit;
-        submitBtn.style.opacity = canSubmit ? '1' : '0.6';
         submitBtn.style.cursor = canSubmit ? 'pointer' : 'not-allowed';
     }
 

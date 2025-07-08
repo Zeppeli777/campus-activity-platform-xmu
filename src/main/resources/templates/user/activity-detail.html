@@ -70,13 +70,84 @@
             color: #666;
             text-align: center;
         }
+
+        /* 按钮状态样式 */
+        .btn-ended {
+            background-color: #6c757d !important;
+            cursor: not-allowed !important;
+            opacity: 0.8;
+        }
+
+        .btn-full {
+            background-color: #ffc107 !important;
+            color: #212529 !important;
+            cursor: not-allowed !important;
+            opacity: 0.8;
+        }
+
+        .btn-registered {
+            background-color: #28a745 !important;
+            cursor: not-allowed !important;
+            opacity: 0.9;
+        }
+
+        .btn-enroll {
+            background-color: #007bff !important;
+            transition: all 0.3s ease;
+        }
+
+        .btn-enroll:hover {
+            background-color: #0056b3 !important;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,123,255,0.3);
+        }
+
+        .btn-login {
+            background-color: #28a745 !important;
+            transition: all 0.3s ease;
+        }
+
+        .btn-login:hover {
+            background-color: #218838 !important;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(40,167,69,0.3);
+        }
+
+        .action-hint {
+            color: #666;
+            font-size: 13px;
+            margin-left: 10px;
+            font-style: italic;
+        }
     </style>
 </head>
 
 <body>
-<header th:replace="layout/header :: header"></header>
+    <header>
+        <div class="container">
+        <h1>活动大厅</h1>
+        <nav>
+            <a href="/">首页</a>
+            <a href="/user/activities/page">用户活动</a>
+            <a href="/admin/activities/page">活动管理</a>
+            <a href="/user/my-registrations">我的报名</a>
+        </nav>
+        </div>
+    </header>
+<div class="container">
 <h1>用户活动详情</h1>
-<main class="activity-detail">
+</div>
+    <main class="activity-detail" style="max-width: 1000px; margin: 60px auto; background-color: rgba(256, 256, 256, 0.9); padding: 40px 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+
+    <!-- 成功/错误消息显示 -->
+    <div th:if="${success}" class="alert alert-success" style="background: #d4edda; color: #155724; padding: 15px; margin-bottom: 20px; border-radius: 5px; border: 1px solid #c3e6cb;">
+        <strong>✓ </strong><span th:text="${success}">成功消息</span>
+    </div>
+
+    <div th:if="${error}" class="alert alert-danger" style="background: #f8d7da; color: #721c24; padding: 15px; margin-bottom: 20px; border-radius: 5px; border: 1px solid #f5c6cb;">
+        <strong>✗ </strong><span th:text="${error}">错误消息</span>
+    </div>
+
     <div class="activity-header">
         <h1 th:text="${activity.title}">活动标题</h1>
     </div>
@@ -111,13 +182,65 @@
                     '无限制'}">报名进度</span>
             </div>
         </div>
-        <!-- 已登录用户根据报名状态显示按钮 -->
-        <div>
+        <!-- 操作按钮区域 -->
+        <div class="activity-actions">
             <a href="/user/activities/page" class="btn btn-secondary">返回活动列表</a>
-            <a th:href="@{/user/registrations/enroll(activityId=${activity.id})}"
-               class="btn">立即报名</a>
-            <a th:href="@{/user/my-registrations}"
-               class="btn btn-secondary">查看我的报名</a>
+
+            <!-- 根据用户登录状态和活动状态显示不同按钮 -->
+
+            <!-- 未登录用户 -->
+            <div th:if="${!isLoggedIn}" style="display: inline-block;">
+                <a href="/login" class="btn btn-login">🔐 登录后报名</a>
+                <span class="action-hint">需要登录后才能报名活动</span>
+            </div>
+
+            <!-- 已登录用户 -->
+            <div th:if="${isLoggedIn}" style="display: inline-block;">
+
+                <!-- 活动已结束 -->
+                <span th:if="${isActivityEnded}" class="btn btn-ended">
+                    ⏰ 活动已结束
+                </span>
+
+                <!-- 活动已满额但未结束 -->
+                <span th:if="${!isActivityEnded and isActivityFull and !isUserRegistered}"
+                      class="btn btn-full">
+                    👥 活动已满额
+                </span>
+
+                <!-- 用户已报名 -->
+                <span th:if="${!isActivityEnded and isUserRegistered}"
+                      class="btn btn-registered">
+                    ✅ 已报名
+                </span>
+
+                <!-- 可以报名 -->
+                <a th:if="${!isActivityEnded and !isActivityFull and !isUserRegistered}"
+                   th:href="@{/user/registrations/enroll(activityId=${activity.id})}"
+                   class="btn btn-enroll"
+                   onclick="return confirm('确定要报名参加这个活动吗？\n\n活动：' + document.querySelector('h1').textContent + '\n开始时间：' + document.querySelector('.activity-meta').textContent)">
+                    🎯 立即报名
+                </a>
+
+                <!-- 查看我的报名按钮 -->
+                <a th:href="@{/user/my-registrations}" class="btn btn-secondary">📋 查看我的报名</a>
+            </div>
+
+            <!-- 活动状态提示 -->
+            <div style="margin-top: 15px;">
+                <small th:if="${isActivityEnded}" class="action-hint">
+                    此活动已于 <span th:text="${#dates.format(activity.endTime, 'yyyy-MM-dd HH:mm')}"></span> 结束
+                </small>
+                <small th:if="${!isActivityEnded and isActivityFull and !isUserRegistered}" class="action-hint">
+                    活动已达到最大容量 (<span th:text="${activity.capacity}"></span> 人)，无法继续报名
+                </small>
+                <small th:if="${!isActivityEnded and isUserRegistered}" class="action-hint">
+                    您已成功报名此活动，请按时参加
+                </small>
+                <small th:if="${!isActivityEnded and !isActivityFull and !isUserRegistered and isLoggedIn}" class="action-hint">
+                    还有 <span th:text="${activity.capacity - registrationCount}"></span> 个名额，抓紧时间报名吧！
+                </small>
+            </div>
         </div>
     </div>
 </main>
