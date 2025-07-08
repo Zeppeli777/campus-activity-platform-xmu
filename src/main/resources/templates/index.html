@@ -38,6 +38,24 @@
         nav ul li {
             margin: 0 10px;
         }
+        /* 通知红点样式 */
+        .notification-link {
+            position: relative;
+            padding-right: 5px;
+        }
+        .notification-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: #e74c3c;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 0.7em;
+            min-width: 8px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
     </style>
 </head>
 
@@ -53,6 +71,13 @@
                 <!-- 根据登录状态显示不同的导航项 -->
                 <li th:if="${isLoggedIn and isAdmin}"><a href="/admin/activities/page">活动管理</a></li>
                 <li th:if="${isLoggedIn}"><a href="/user/my-registrations">我的报名</a></li>
+                <!-- 添加通知按钮 -->
+                <li th:if="${isLoggedIn}">
+                   <a href="/notifications" class="notification-link">
+                     通知
+                     <span th:if="${unreadCount > 0}" class="notification-badge" th:text="${unreadCount}"></span>
+                     </a>
+                </li>
 
                 <!-- 未登录状态显示登录链接 -->
                 <li th:if="${!isLoggedIn}"><a href="/login" class="login-link">登录</a></li>

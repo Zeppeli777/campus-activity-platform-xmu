@@ -4,6 +4,26 @@
     <meta charset="UTF-8">
     <title th:text="${title} ?: '校园活动平台'"></title>
     <link rel="stylesheet" th:href="@{/static/css/style.css}">
+    <style>
+        /* 通知红点样式 */
+        .notification-link {
+            position: relative;
+            padding-right: 5px;
+        }
+        .notification-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: #e74c3c;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 0.7em;
+            min-width: 8px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+    </style>
 </head>
 <body>
     <header id="header">
@@ -14,6 +34,10 @@
                 <li><a href="/user/activities/page">用户活动</a></li>
                 <li><a href="/admin/activities/page">活动管理</a></li>
                 <li><a href="/user/my-registrations">我的报名</a></li>
+                <li><a href="/notifications" class="notification-link">
+                    通知
+                    <span th:if="${unreadCount > 0}" class="notification-badge" th:text="${unreadCount}"></span>
+                </a></li>
             </ul>
         </nav>
     </header>

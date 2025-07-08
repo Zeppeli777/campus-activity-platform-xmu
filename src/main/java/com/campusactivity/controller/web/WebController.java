@@ -15,6 +15,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import com.campusactivity.entity.Notification;
+import com.campusactivity.service.NotificationService;
+
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -39,7 +42,8 @@ public class WebController {
     private RegistrationService registrationService;
     @Autowired
     private UserDetailsService userDetailsService;
-
+    @Autowired
+    private NotificationService notificationService;
     /**
      * 首页 - 显示欢迎页面和快速导航
      * 根据用户登录状态显示不同的导航栏
@@ -55,24 +59,34 @@ public class WebController {
         if ("true".equals(logout)) {
             model.addAttribute("logoutSuccess", true);
         }
-
+        
         // 检查用户登录状态
-        if (authentication != null && authentication.isAuthenticated() &&
-            !authentication.getName().equals("anonymousUser")) {
-            // 用户已登录
-            model.addAttribute("isLoggedIn", true);
-            model.addAttribute("username", authentication.getName());
-
-            // 检查用户角色
-            boolean isAdmin = authentication.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
-            model.addAttribute("isAdmin", isAdmin);
-        } else {
-            // 用户未登录
-            model.addAttribute("isLoggedIn", false);
+        boolean isLoggedIn = false;
+        boolean isAdmin = false;
+        String username = "";
+        long unreadCount = 0;
+        
+        if (authentication != null && authentication.isAuthenticated()) {
+            isLoggedIn = true;
+            username = authentication.getName();
+            
+            // 检查是否是管理员
+            isAdmin = authentication.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+            
+            // 获取未读通知数量
+            User user = userRepository.findByUsername(username);
+            if (user != null) {
+                unreadCount = notificationService.getUnreadNotificationCount(user);
+            }
         }
-
-        return "index"; // 返回 templates/index.html 模板
+        
+        model.addAttribute("isLoggedIn", isLoggedIn);
+        model.addAttribute("isAdmin", isAdmin);
+        model.addAttribute("username", username);
+        model.addAttribute("unreadCount", unreadCount);
+        
+        return "index";
     }
     
     /**
@@ -261,7 +275,7 @@ public class WebController {
 
             // 保存活动
             activityService.createActivity(activity);
-
+            
             redirectAttributes.addFlashAttribute("successMessage", "活动创建成功！");
             return "redirect:/admin/activities/page";
 
@@ -335,6 +349,12 @@ public class WebController {
 
             // 保存活动
             activityService.updateActivity(id, activity);
+            List<Registration> registrations = registrationService.getRegistrationsByActivityId(id);
+            String message = String.format("活动 '%s' 已被更新，请查看最新信息。", title);
+            for (Registration registration : registrations) {
+               User user = registration.getUser();
+               notificationService.sendNotification(user, message);
+            }
 
             redirectAttributes.addFlashAttribute("successMessage", "活动更新成功！");
             return "redirect:/admin/activities/page";
@@ -347,6 +367,7 @@ public class WebController {
             return "redirect:/admin/activities/edit/" + id;
         }
     }
+    
     
     /**
      * 报名活动 - GET方式处理（从活动详情页面跳转）
@@ -483,6 +504,81 @@ public class WebController {
         model.addAttribute("title", "活动报名统计");
 
         return "admin/statistics";
+    }
+        /**
+     * 通知界面
+     */
+    @GetMapping("/notifications")
+    public String notifications(Model model, Authentication authentication) {
+        // 检查 authentication 是否为 null
+        if (authentication == null) {
+            // 重定向到登录页面，可根据实际需求修改
+            return "redirect:/login";
+        }
+        String username = authentication.getName();
+        User user = userRepository.findByUsername(username);
+
+        // 检查 user 是否为 null
+        if (user == null) {
+            // 添加错误信息
+            model.addAttribute("errorMessage", "未找到对应的用户信息，请重新登录。");
+            // 重定向到登录页面，可根据实际需求修改
+            return "redirect:/login";
+        }
+
+        List<Notification> unreadNotifications = notificationService.getUserUnreadNotifications(user);
+        List<Notification> allNotifications = notificationService.getUserNotifications(user);
+        long unreadCount = notificationService.getUnreadNotificationCount(user);
+
+        // 处理通知列表为空的情况
+        model.addAttribute("unreadNotifications", unreadNotifications != null ? unreadNotifications : new ArrayList<>());
+        model.addAttribute("allNotifications", allNotifications != null ? allNotifications : new ArrayList<>());
+        model.addAttribute("unreadCount", unreadCount);
+        model.addAttribute("title", "通知中心");
+        return "user/notification";
+    }
+
+    /**
+     * 标记单个通知为已读
+     */
+    @PostMapping("/markAsRead")
+    public String markAsRead(@RequestParam Long notificationId, RedirectAttributes redirectAttributes) {
+        try {
+            notificationService.markAsRead(notificationId);
+            redirectAttributes.addFlashAttribute("successMessage", "通知已标记为已读");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "标记通知失败: " + e.getMessage());
+        }
+        return "redirect:/notifications";
+    }
+
+    /**
+     * 标记所有通知为已读
+     */
+    @PostMapping("/markAllAsRead")
+    public String markAllAsRead(Authentication authentication, RedirectAttributes redirectAttributes) {
+        try {
+            if (authentication == null) {
+                return "redirect:/login";
+            }
+            
+            String username = authentication.getName();
+            User user = userRepository.findByUsername(username);
+            
+            if (user == null) {
+                return "redirect:/login";
+            }
+            
+            List<Notification> unreadNotifications = notificationService.getUserUnreadNotifications(user);
+            for (Notification notification : unreadNotifications) {
+                notificationService.markAsRead(notification.getId());
+            }
+            
+            redirectAttributes.addFlashAttribute("successMessage", "所有通知已标记为已读");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "标记通知失败: " + e.getMessage());
+        }
+        return "redirect:/notifications";
     }
 
 }
