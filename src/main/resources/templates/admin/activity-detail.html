@@ -4,6 +4,61 @@
     <meta charset="UTF-8">
     <title th:text="${title} ?: '活动详情'"></title>
     <link rel="stylesheet" th:href="@{/static/css/style.css}">
+    <style>
+        /* 富文本内容样式 */
+        .description-content div {
+            line-height: 1.6;
+            margin: 10px 0;
+        }
+
+        .description-content p {
+            margin: 10px 0;
+        }
+
+        .description-content h1,
+        .description-content h2,
+        .description-content h3 {
+            margin: 15px 0 10px 0;
+            color: #333;
+        }
+
+        .description-content h1 { font-size: 1.5em; }
+        .description-content h2 { font-size: 1.3em; }
+        .description-content h3 { font-size: 1.1em; }
+
+        .description-content strong,
+        .description-content b {
+            font-weight: 600;
+        }
+
+        .description-content em,
+        .description-content i {
+            font-style: italic;
+        }
+
+        .description-content u {
+            text-decoration: underline;
+        }
+
+        .description-content ul,
+        .description-content ol {
+            margin: 10px 0;
+            padding-left: 25px;
+        }
+
+        .description-content li {
+            margin: 5px 0;
+        }
+
+        .description-content a {
+            color: #4285f4;
+            text-decoration: none;
+        }
+
+        .description-content a:hover {
+            text-decoration: underline;
+        }
+    </style>
 </head>
 <body>
     <header id="header">

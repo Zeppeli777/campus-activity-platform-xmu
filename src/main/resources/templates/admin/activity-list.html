@@ -4,6 +4,74 @@
     <meta charset="UTF-8">
     <title th:text="${title} ?: '活动管理列表'"></title>
     <link rel="stylesheet" th:href="@{/static/css/style.css}">
+    <style>
+        /* 富文本内容在列表中的样式 */
+        .activity-description-preview {
+            display: block;
+            margin-top: 5px;
+            line-height: 1.4;
+            max-height: 60px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .activity-description-preview div {
+            font-size: 12px;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        .activity-description-preview p {
+            margin: 0 0 3px 0;
+            font-size: 12px;
+        }
+
+        .activity-description-preview h1,
+        .activity-description-preview h2,
+        .activity-description-preview h3 {
+            font-size: 12px;
+            margin: 2px 0;
+            font-weight: 600;
+        }
+
+        .activity-description-preview strong,
+        .activity-description-preview b {
+            font-weight: 600;
+        }
+
+        .activity-description-preview em,
+        .activity-description-preview i {
+            font-style: italic;
+        }
+
+        .activity-description-preview u {
+            text-decoration: underline;
+        }
+
+        .activity-description-preview ul,
+        .activity-description-preview ol {
+            margin: 0;
+            padding-left: 15px;
+            font-size: 12px;
+        }
+
+        .activity-description-preview li {
+            margin: 1px 0;
+            font-size: 12px;
+        }
+
+        /* 添加渐变遮罩效果，表示内容被截断 */
+        .activity-description-preview::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 15px;
+            background: linear-gradient(transparent, white);
+            pointer-events: none;
+        }
+    </style>
 </head>
 <body>
     <header id="header">
@@ -59,8 +127,9 @@
                                     <td>
                                         <div class="activity-title">
                                             <strong th:text="${activity.title}">活动标题</strong>
-                                            <small th:if="${activity.description}"
-                                                   th:text="${#strings.abbreviate(activity.description, 80)}">活动描述</small>
+                                            <small th:if="${activity.description}" class="activity-description-preview">
+                                                <div th:utext="${activity.description}">活动描述</div>
+                                            </small>
                                         </div>
                                     </td>
                                     <td>

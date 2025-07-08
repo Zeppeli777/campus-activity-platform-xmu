@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <title th:text="${title}"></title>
     <link rel="stylesheet" th:href="@{/static/css/style.css}">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <style>
         .activity-detail {
             max-width: 800px;
@@ -92,19 +91,6 @@
             opacity: 0.9;
         }
 
-        .btn-cancel {
-            background-color: #dc3545 !important;
-            border-color: #dc3545 !important;
-            transition: all 0.3s ease;
-        }
-
-        .btn-cancel:hover {
-            background-color: #c82333 !important;
-            border-color: #bd2130 !important;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(220,53,69,0.3);
-        }
-
         .btn-enroll {
             background-color: #007bff !important;
             transition: all 0.3s ease;
@@ -133,6 +119,60 @@
             margin-left: 10px;
             font-style: italic;
         }
+
+        /* 富文本内容样式 */
+        .activity-content > div {
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .activity-content p {
+            margin: 10px 0;
+        }
+
+        .activity-content h1,
+        .activity-content h2,
+        .activity-content h3 {
+            margin: 15px 0 10px 0;
+            color: #333;
+        }
+
+        .activity-content h1 { font-size: 1.5em; }
+        .activity-content h2 { font-size: 1.3em; }
+        .activity-content h3 { font-size: 1.1em; }
+
+        .activity-content strong,
+        .activity-content b {
+            font-weight: 600;
+        }
+
+        .activity-content em,
+        .activity-content i {
+            font-style: italic;
+        }
+
+        .activity-content u {
+            text-decoration: underline;
+        }
+
+        .activity-content ul,
+        .activity-content ol {
+            margin: 10px 0;
+            padding-left: 25px;
+        }
+
+        .activity-content li {
+            margin: 5px 0;
+        }
+
+        .activity-content a {
+            color: #4285f4;
+            text-decoration: none;
+        }
+
+        .activity-content a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 
@@ -150,12 +190,9 @@
         </nav>
     </div>
 </header>
-
 <div class="container">
-    <h1>用户活动详情</h1>
-    <hr style="border: 0; height: 2px; background: linear-gradient(to right, #4285f4, #34a853, transparent); margin: 0; width: 100%; border-radius: 2px;">
+<h1>用户活动详情</h1>
 </div>
-
     <main class="activity-detail" style="max-width: 1000px; margin: 60px auto; background-color: rgba(256, 256, 256, 0.9); padding: 40px 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
 
     <!-- 成功/错误消息显示 -->
@@ -227,13 +264,11 @@
                     👥 活动已满额
                 </span>
 
-                <!-- 用户已报名 - 显示取消报名按钮 -->
-                <button th:if="${!isActivityEnded and isUserRegistered}"
-                        class="btn btn-cancel"
-                        onclick="cancelRegistration()"
-                        th:data-activity-id="${activity.id}">
-                    🚫 取消报名
-                </button>
+                <!-- 用户已报名 -->
+                <span th:if="${!isActivityEnded and isUserRegistered}"
+                      class="btn btn-registered">
+                    ✅ 已报名
+                </span>
 
                 <!-- 可以报名 -->
                 <a th:if="${!isActivityEnded and !isActivityFull and !isUserRegistered}"
@@ -265,57 +300,3 @@
         </div>
     </div>
 </main>
-
-<script>
-function cancelRegistration() {
-    const activityId = event.target.getAttribute('data-activity-id');
-    const activityTitle = document.querySelector('h1').textContent;
-
-    // 确认对话框
-    if (!confirm('确定要取消报名以下活动吗？\n\n' + activityTitle + '\n\n取消后可以重新报名（如果还有名额）。')) {
-        return;
-    }
-
-    const button = event.target;
-    const originalText = button.textContent;
-
-    // 禁用按钮并显示加载状态
-    button.disabled = true;
-    button.textContent = '取消中...';
-
-    // 发送取消报名请求
-    $.post('/user/activities/cancel', {
-        activityId: activityId,
-        userId: [[${currentUserId}]]
-    })
-    .done(function(response) {
-        if (response.success) {
-            alert('✅ 取消报名成功！\n\n您已成功取消报名：' + activityTitle + '\n\n如需要可以重新报名。');
-            location.reload(); // 刷新页面更新状态
-        } else {
-            alert('❌ 取消报名失败\n\n' + (response.message || '未知错误'));
-            button.disabled = false;
-            button.textContent = originalText;
-        }
-    })
-    .fail(function(xhr, status, error) {
-        console.error('取消报名请求失败:', xhr, status, error);
-        let errorMessage = '网络错误，请稍后重试';
-
-        if (xhr.status === 401) {
-            errorMessage = '登录已过期，请重新登录';
-            setTimeout(() => {
-                window.location.href = '/login';
-            }, 2000);
-        } else if (xhr.status === 403) {
-            errorMessage = '没有权限执行此操作';
-        } else if (xhr.status === 404) {
-            errorMessage = '活动不存在或已被删除';
-        }
-
-        alert('❌ 取消报名失败\n\n' + errorMessage);
-        button.disabled = false;
-        button.textContent = originalText;
-    });
-}
-</script>
