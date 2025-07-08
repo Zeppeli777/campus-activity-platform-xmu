@@ -6,10 +6,27 @@
     <link rel="stylesheet" th:href="@{/static/css/style.css}">
 </head>
 <body>
-    <header th:replace="layout/header :: header"></header>
+<header id="header">
+    <div class="container">
+        <h1>校园活动平台</h1>
+        <nav>
+            <ul>
+                <li><a href="/">首页</a></li>
+                <li><a href="/user/activities/page" class="active">用户活动</a></li>
+                <li><a href="/admin/activities/page">活动管理</a></li>
+                <li><a href="/user/my-registrations">我的报名</a></li>
+                <li><a href="/notifications">通知</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
+<main id="content">
+    <div class="container" style="max-width: 1000px; margin: 60px auto; background-color: rgba(256, 256, 256, 0.8); padding: 40px 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
     <h1>404 - 页面未找到</h1>
     <p>您访问的页面不存在，请检查网址或返回主页。</p>
-    <a href="/">返回主页</a>
+     <a href="/" style="color: #e74c3c; text-decoration: underline; font-weight: bold; transition: all 0.3s ease;" onmouseover="this.style.color='#c0392b'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 2px 5px rgba(0,0,0,0.1)';" onmouseout="this.style.color='#e74c3c'; this.style.transform='translateY(0)'; this.style.boxShadow='none';">返回主页</a>
+        </div>
+    </main>
     <footer th:replace="layout/footer :: footer"></footer>
 </body>
 </html>

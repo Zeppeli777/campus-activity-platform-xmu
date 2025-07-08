@@ -45,6 +45,37 @@
             box-shadow: 0 4px 8px rgba(40,167,69,0.3);
         }
 
+        /* 取消报名按钮样式 */
+        .cancel-btn {
+            background-color: #FFE4E1 !important;
+            border-color: #FFF0F5 !important;
+            transition: all 0.3s ease;
+        }
+
+        .cancel-btn:hover:not(:disabled) {
+            background-color: #c82333 !important;
+            border-color: #bd2130 !important;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(220,53,69,0.3);
+        }
+        
+        /* 已满额按钮样式 */
+        .btn-full {
+            background-color: #28a745 !important;
+            border-color: #28a745 !important;
+            opacity: 0.8;
+            color: white !important;
+            font-weight: bold !important;
+        }
+        
+        /* 已结束按钮样式 */
+        .btn-ended {
+            background-color: #adb5bd !important;
+            border-color: #adb5bd !important;
+            color: #212529 !important;
+            font-weight: bold !important;
+        }
+
         /* 用户状态提示样式 */
         .user-status-info {
             margin-bottom: 20px;
@@ -126,11 +157,17 @@
                                     th:data-activity-id="${activity.id}"
                                     th:data-user-id="${currentUserId}">立即报名</button>
 
-                            <!-- 不能报名（已报名、已满额、已结束等） -->
-                            <button th:if="${canRegister == null or !canRegister.get(activity.id)}"
-                                    class="btn btn-secondary"
+                            <!-- 已报名 - 显示取消报名按钮 -->
+                            <button th:if="${activityStatuses != null and activityStatuses.get(activity.id) == '已报名'}"
+                                    class="btn cancel-btn"
+                                    th:data-activity-id="${activity.id}"
+                                    th:data-user-id="${currentUserId}">取消报名</button>
+
+                            <!-- 其他不能报名状态（已满额、已结束等） -->
+                            <button th:if="${activityStatuses != null and activityStatuses.get(activity.id) != '已报名' and (canRegister == null or !canRegister.get(activity.id))}"
+                                    th:class="'btn ' + ${activityStatuses.get(activity.id) == '已满额' ? 'btn-full' : (activityStatuses.get(activity.id) == '已结束' ? 'btn-ended' : 'btn-secondary')}"
                                     disabled>
-                                <span th:if="${activityStatuses != null}" th:text="${activityStatuses.get(activity.id)}">无法报名</span>
+                                <span th:text="${activityStatuses.get(activity.id)}">无法报名</span>
                             </button>
                         </div>
                     </div>
@@ -153,6 +190,7 @@
 
         // 报名功能
         $(document).ready(function() {
+            // 报名按钮点击事件
             $('.register-btn').click(function() {
                 const activityId = $(this).data('activity-id');
                 const userId = $(this).data('user-id');
@@ -204,6 +242,61 @@
 
                     alert('❌ 报名失败\n\n' + errorMessage);
                     button.prop('disabled', false).text('立即报名');
+                });
+            });
+
+            // 取消报名按钮点击事件
+            $('.cancel-btn').click(function() {
+                const activityId = $(this).data('activity-id');
+                const userId = $(this).data('user-id');
+                const button = $(this);
+                const activityTitle = $(this).closest('.activity-card').find('h3').text().split('\n')[0].trim();
+
+                // 检查用户ID是否存在
+                if (!userId) {
+                    alert('用户信息获取失败，请刷新页面后重试');
+                    return;
+                }
+
+                // 确认对话框
+                if (!confirm('确定要取消报名以下活动吗？\n\n' + activityTitle + '\n\n取消后可以重新报名（如果还有名额）。')) {
+                    return;
+                }
+
+                // 禁用按钮并显示加载状态
+                button.prop('disabled', true).text('取消中...');
+
+                // 发送取消报名请求
+                $.post('/user/activities/cancel', {
+                    activityId: activityId,
+                    userId: userId
+                })
+                .done(function(response) {
+                    if (response.success) {
+                        alert('✅ 取消报名成功！\n\n您已成功取消报名：' + activityTitle + '\n\n如需要可以重新报名。');
+                        location.reload(); // 刷新页面更新状态
+                    } else {
+                        alert('❌ 取消报名失败\n\n' + (response.message || '未知错误'));
+                        button.prop('disabled', false).text('取消报名');
+                    }
+                })
+                .fail(function(xhr, status, error) {
+                    console.error('取消报名请求失败:', xhr, status, error);
+                    let errorMessage = '网络错误，请稍后重试';
+
+                    if (xhr.status === 401) {
+                        errorMessage = '登录已过期，请重新登录';
+                        setTimeout(() => {
+                            window.location.href = '/login';
+                        }, 2000);
+                    } else if (xhr.status === 403) {
+                        errorMessage = '没有权限执行此操作';
+                    } else if (xhr.status === 404) {
+                        errorMessage = '活动不存在或已被删除';
+                    }
+
+                    alert('❌ 取消报名失败\n\n' + errorMessage);
+                    button.prop('disabled', false).text('取消报名');
                 });
             });
         });

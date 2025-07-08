@@ -1,13 +1,27 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <title>403 - 访问被拒绝</title>
     <link rel="stylesheet" th:href="@{/static/css/style.css}">
 </head>
 <body>
-<header th:replace="~{layout/header :: header}"></header>
-<div class="container">
+<header id="header">
+    <div class="container">
+        <h1>校园活动平台</h1>
+        <nav>
+            <ul>
+                <li><a href="/">首页</a></li>
+                <li><a href="/user/activities/page" class="active">用户活动</a></li>
+                <li><a href="/admin/activities/page">活动管理</a></li>
+                <li><a href="/user/my-registrations">我的报名</a></li>
+                <li><a href="/notifications">通知</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
+<div class="container" style="max-width: 1000px; margin: 60px auto; background-color: rgba(256, 256, 256, 0.8); padding: 40px 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
     <div class="error-container">
         <h1>403 - 访问被拒绝</h1>
         <p>很抱歉，您没有权限访问此页面。</p>

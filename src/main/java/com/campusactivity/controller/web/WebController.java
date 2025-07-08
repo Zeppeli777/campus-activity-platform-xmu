@@ -425,6 +425,25 @@ public class WebController {
     }
 
     /**
+     * 取消报名活动 - POST方式处理（AJAX调用）
+     */
+    @PostMapping("/user/activities/cancel")
+    @ResponseBody
+    public Map<String, Object> cancelActivity(@RequestParam Long activityId,
+                                             @RequestParam Long userId) {
+        Map<String, Object> result = new HashMap<>();
+        try {
+            registrationService.cancelUserRegistration(userId, activityId);
+            result.put("success", true);
+            result.put("message", "取消报名成功！");
+        } catch (Exception e) {
+            result.put("success", false);
+            result.put("message", e.getMessage());
+        }
+        return result;
+    }
+
+    /**
      * 我的报名页面
      */
     @GetMapping("/user/my-registrations")

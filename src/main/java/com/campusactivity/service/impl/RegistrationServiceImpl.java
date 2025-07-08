@@ -99,6 +99,34 @@ public class RegistrationServiceImpl implements RegistrationService {
     public boolean isUserRegistered(Long userId, Long activityId) {
         return registrationRepository.countByActivityIdAndUserId(activityId, userId) > 0;
     }
+
+    @Override
+    public void cancelUserRegistration(Long userId, Long activityId) {
+        // 检查用户和活动是否存在
+        User user = userRepository.findById(userId).orElse(null);
+        Activity activity = activityRepository.findById(activityId).orElse(null);
+
+        if (user == null || activity == null) {
+            throw new RuntimeException("用户或活动不存在");
+        }
+
+        // 检查用户是否已报名
+        if (!isUserRegistered(userId, activityId)) {
+            throw new RuntimeException("您尚未报名此活动");
+        }
+
+        // 检查活动是否已开始（可选：根据业务需求决定是否允许活动开始后取消报名）
+        Date now = new Date();
+        if (activity.getStartTime() != null && activity.getStartTime().before(now)) {
+            throw new RuntimeException("活动已开始，无法取消报名");
+        }
+
+        // 查找并删除报名记录
+        Registration registration = registrationRepository.findByUserAndActivity(user, activity).orElse(null);
+        if (registration != null) {
+            registrationRepository.delete(registration);
+        }
+    }
     
     
     @Override

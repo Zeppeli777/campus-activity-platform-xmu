@@ -17,6 +17,9 @@ public interface RegistrationService {
     List<Registration> getUserRegistrations(Long userId);
     boolean isUserRegistered(Long userId, Long activityId);
 
+    // 取消报名方法
+    void cancelUserRegistration(Long userId, Long activityId);
+
     
     List<Registration> getRegistrationsByActivityId(Long activityId);
     long countRegistrationsByActivityId(Long activityId);
