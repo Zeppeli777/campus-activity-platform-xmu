@@ -34,9 +34,23 @@
             text-decoration: none;
         }
         .btn-secondary {
-            background-color: #f5f5f5;
-            color: #333;
-            border: 1px solid #ddd;
+            background-color: #f8f9fa !important;
+            color: #495057 !important;
+            font-weight: 500 !important;
+            font-size: 15px !important;
+            padding: 9px 18px !important;
+            border-radius: 8px !important;
+            border: 1px solid #dee2e6 !important;
+            transition: all 0.3s ease;
+        }
+
+        /* 修改次要按钮悬浮样式，避免使用绿色 */
+        .btn-secondary:hover {
+            background-color: #e9ecef !important; /* 浅灰色背景 */
+            color: #212529 !important; /* 深色文字，确保可见 */
+            border-color: #ced4da !important;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
         .registration-info {
             background-color: #f8f9fa;
@@ -92,25 +106,39 @@
         }
 
         .btn-enroll {
-            background-color: #007bff !important;
+            background-color: #007bff !important; /* 保持原来的蓝色系 */
+            color: white !important;
+            font-weight: bold !important;
+            font-size: 16px !important;
+            padding: 10px 20px !important;
+            border-radius: 8px !important;
+            border: 2px solid #007bff !important;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
             transition: all 0.3s ease;
         }
 
         .btn-enroll:hover {
             background-color: #0056b3 !important;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(0,123,255,0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0,123,255,0.4);
         }
 
         .btn-login {
-            background-color: #28a745 !important;
+            background-color: #2ed573 !important; /* 更鲜艳的绿色 */
+            color: white !important;
+            font-weight: bold !important;
+            font-size: 16px !important;
+            padding: 10px 20px !important;
+            border-radius: 8px !important;
+            border: 2px solid #2ed573 !important;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
             transition: all 0.3s ease;
         }
 
         .btn-login:hover {
-            background-color: #218838 !important;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(40,167,69,0.3);
+            background-color: #7bed9f !important;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(46,213,115,0.4);
         }
 
         .action-hint {
@@ -172,6 +200,47 @@
 
         .activity-content a:hover {
             text-decoration: underline;
+        }
+
+        /* 取消报名按钮改为红色系 */
+        .cancel-btn {
+            background-color: #dc3545 !important; /* 红色背景 */
+            color: white !important;
+            font-weight: bold !important;
+            font-size: 16px !important;
+            padding: 10px 20px !important;
+            border-radius: 8px !important;
+            border: 2px solid #dc3545 !important;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .cancel-btn:hover {
+            background-color: #c82333 !important;
+            border-color: #bd2130 !important;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(220,53,69,0.4);
+        }
+
+        /* 优化已报名状态按钮样式 */
+        .btn-registered {
+            background-color: #1e90ff !important; /* 更鲜艳的蓝色 */
+            color: white !important;
+            font-weight: bold !important;
+            font-size: 16px !important;
+            padding: 10px 20px !important;
+            border-radius: 8px !important;
+            border: 2px solid #1e90ff !important;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+
+        /* 优化已结束和已满额按钮样式 */
+        .btn-ended, .btn-full {
+            font-weight: bold !important;
+            font-size: 16px !important;
+            padding: 10px 20px !important;
+            border-radius: 8px !important;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
         }
     </style>
 </head>
@@ -264,11 +333,13 @@
                     👥 活动已满额
                 </span>
 
-                <!-- 用户已报名 -->
-                <span th:if="${!isActivityEnded and isUserRegistered}"
-                      class="btn btn-registered">
-                    ✅ 已报名
-                </span>
+                <!-- 用户已报名 - 改为取消报名按钮 -->
+                <a th:if="${!isActivityEnded and isUserRegistered}"
+                   th:href="@{/user/registrations/cancel(activityId=${activity.id})}"
+                   class="btn cancel-btn"
+                   onclick="return confirm('确定要取消报名参加这个活动吗？\n\n活动：' + document.querySelector('h1').textContent + '\n开始时间：' + document.querySelector('.activity-meta').textContent)">
+                    ❌ 取消报名
+                </a>
 
                 <!-- 可以报名 -->
                 <a th:if="${!isActivityEnded and !isActivityFull and !isUserRegistered}"

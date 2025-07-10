@@ -444,6 +444,41 @@ public class WebController {
     }
 
     /**
+     * 取消报名活动 - GET方式处理（从活动详情页面跳转）
+     */
+    @GetMapping("/user/registrations/cancel")
+    public String cancelActivityRegistration(@RequestParam Long activityId,
+                            Authentication authentication,
+                            RedirectAttributes redirectAttributes) {
+        try {
+            // 检查用户是否登录
+            if (authentication == null || !authentication.isAuthenticated() ||
+                authentication.getName().equals("anonymousUser")) {
+                redirectAttributes.addFlashAttribute("error", "请先登录后再操作！");
+                return "redirect:/login";
+            }
+
+            // 获取当前用户
+            String username = authentication.getName();
+            User currentUser = userRepository.findByUsername(username);
+            if (currentUser == null) {
+                redirectAttributes.addFlashAttribute("error", "用户信息不存在！");
+                return "redirect:/login";
+            }
+
+            // 执行取消报名
+            registrationService.cancelUserRegistration(currentUser.getId(), activityId);
+            redirectAttributes.addFlashAttribute("success", "取消报名成功！");
+
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
+
+        // 重定向回活动详情页面
+        return "redirect:/user/activities/page/" + activityId;
+    }
+
+    /**
      * 我的报名页面
      */
     @GetMapping("/user/my-registrations")
