@@ -157,8 +157,10 @@
                 <span th:text="${errorMessage}"></span>
             </div>
 
+            <!-- 未读通知部分 -->
             <h2 class="section-title">未读通知</h2>
-            <div th:if="${unreadNotifications.size() > 0}">
+            <!-- 使用 th:if 和 th:unless 确保只显示一个 -->
+            <div th:if="${unreadNotifications != null && unreadNotifications.size() > 0}">
                 <div th:each="notification : ${unreadNotifications}" class="notification unread">
                     <div class="notification-header">
                         <span th:text="${notification.message}"></span>
@@ -173,12 +175,14 @@
                     </div>
                 </div>
             </div>
-            <div th:else class="empty-state">
+            <div th:unless="${unreadNotifications != null && unreadNotifications.size() > 0}" class="empty-state">
                 <p>暂无未读通知</p>
             </div>
 
+            <!-- 所有通知部分 -->
             <h2 class="section-title">所有通知</h2>
-            <div th:if="${allNotifications.size() > 0}">
+            <!-- 使用 th:if 和 th:unless 确保只显示一个 -->
+            <div th:if="${allNotifications != null && allNotifications.size() > 0}">
                 <div th:each="notification : ${allNotifications}" class="notification" th:classappend="${!notification.read}? 'unread'">
                     <div class="notification-header">
                         <span th:text="${notification.message}"></span>
@@ -195,7 +199,7 @@
                     </div>
                 </div>
             </div>
-            <div th:else class="empty-state">
+            <div th:unless="${allNotifications != null && allNotifications.size() > 0}" class="empty-state">
                 <p>暂无通知</p>
             </div>
         </div>
